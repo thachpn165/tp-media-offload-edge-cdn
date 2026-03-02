@@ -23,16 +23,36 @@ class R2ClientTest extends TestCase {
 	private array $test_credentials;
 
 	/**
+	 * Temp files created during tests.
+	 *
+	 * @var array<int, string>
+	 */
+	private array $tmp_files = array();
+
+	/**
 	 * Setup test environment.
 	 */
 	protected function setUp(): void {
 		parent::setUp();
+		cfr2_test_reset_wp_state();
 		$this->test_credentials = array(
 			'account_id'        => 'test_account_123',
 			'access_key_id'     => 'test_access_key',
 			'secret_access_key' => 'test_secret_key',
 			'bucket'            => 'test-bucket',
 		);
+	}
+
+	/**
+	 * Cleanup temp files.
+	 */
+	protected function tearDown(): void {
+		foreach ( $this->tmp_files as $file ) {
+			if ( file_exists( $file ) ) {
+				unlink( $file );
+			}
+		}
+		parent::tearDown();
 	}
 
 	/**
@@ -73,17 +93,35 @@ class R2ClientTest extends TestCase {
 	}
 
 	/**
-	 * Test test_connection returns expected array structure.
+	 * Test upload_file returns clear error when local file is missing.
 	 */
-	public function test_test_connection_returns_array(): void {
-		// Simplified test - in real environment, mock AWS SDK.
+	public function test_upload_file_returns_error_for_missing_file(): void {
 		$client = new R2Client( $this->test_credentials );
-		$result = $client->test_connection();
 
-		$this->assertIsArray( $result );
-		$this->assertArrayHasKey( 'success', $result );
-		$this->assertArrayHasKey( 'message', $result );
-		$this->assertIsBool( $result['success'] );
-		$this->assertIsString( $result['message'] );
+		$result = $client->upload_file( '/tmp/definitely-missing-file.jpg', 'uploads/file.jpg' );
+
+		$this->assertFalse( $result['success'] );
+		$this->assertSame( 'Local file not found', $result['message'] );
+	}
+
+	/**
+	 * Test upload_file rejects files larger than 70MB before any remote call.
+	 */
+	public function test_upload_file_rejects_oversized_file(): void {
+		$client = new R2Client( $this->test_credentials );
+
+		$tmp_file = tempnam( sys_get_temp_dir(), 'cfr2-large-' );
+		$this->assertNotFalse( $tmp_file );
+		$this->tmp_files[] = $tmp_file;
+
+		$handle = fopen( $tmp_file, 'wb' );
+		$this->assertNotFalse( $handle );
+		ftruncate( $handle, 71 * 1024 * 1024 );
+		fclose( $handle );
+
+		$result = $client->upload_file( $tmp_file, 'uploads/too-large.bin' );
+
+		$this->assertFalse( $result['success'] );
+		$this->assertSame( 'File exceeds 70MB limit', $result['message'] );
 	}
 }

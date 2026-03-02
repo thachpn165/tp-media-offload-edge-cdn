@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 use WP_REST_Request;
 use WP_REST_Response;
 use ThachPN165\CFR2OffLoad\Constants\MetaKeys;
-use ThachPN165\CFR2OffLoad\Services\SettingsService;
+use ThachPN165\CFR2OffLoad\Constants\Settings;
 
 /**
  * RestApiStatusHandler class - handles read-only status endpoints.
@@ -38,23 +38,33 @@ class RestApiStatusHandler {
 
 		$is_offloaded  = (bool) get_post_meta( $attachment_id, MetaKeys::OFFLOADED, true );
 		$r2_url        = get_post_meta( $attachment_id, MetaKeys::R2_URL, true );
-		$local_deleted = (bool) get_post_meta( $attachment_id, MetaKeys::LOCAL_DELETED, true );
+		$file_path     = get_attached_file( $attachment_id );
+		$local_exists  = is_string( $file_path ) && '' !== $file_path && file_exists( $file_path );
 
 		// Get local URL.
 		$local_url = null;
-		if ( ! $local_deleted ) {
+		if ( $local_exists ) {
 			$local_url = wp_get_attachment_url( $attachment_id );
 		}
 
 		// Build CDN URL if enabled.
 		$cdn_url  = null;
-		$settings = SettingsService::get_settings();
-		if ( $is_offloaded && ! empty( $settings['cdn_enabled'] ) && ! empty( $settings['cdn_url'] ) ) {
-			$cdn_url = $r2_url ? str_replace(
-				$settings['r2_public_domain'] ?? '',
-				rtrim( $settings['cdn_url'], '/' ),
-				$r2_url
-			) : null;
+		$settings = get_option( Settings::OPTION_KEY, array() );
+		$cdn_base = ! empty( $settings['cdn_url'] ) ? rtrim( (string) $settings['cdn_url'], '/' ) : '';
+		$r2_base  = ! empty( $settings['r2_public_domain'] ) ? rtrim( (string) $settings['r2_public_domain'], '/' ) : '';
+
+		if ( $is_offloaded && ! empty( $settings['cdn_enabled'] ) && '' !== $cdn_base ) {
+			$r2_url_string = is_string( $r2_url ) ? $r2_url : '';
+
+			// Keep original object path when converting from R2 public URL to CDN URL.
+			if ( '' !== $r2_url_string && '' !== $r2_base && str_starts_with( $r2_url_string, $r2_base . '/' ) ) {
+				$cdn_url = $cdn_base . substr( $r2_url_string, strlen( $r2_base ) );
+			} else {
+				$r2_key = get_post_meta( $attachment_id, MetaKeys::R2_KEY, true );
+				if ( is_string( $r2_key ) && '' !== $r2_key ) {
+					$cdn_url = $cdn_base . '/' . ltrim( $r2_key, '/' );
+				}
+			}
 		}
 
 		// Get attachment metadata.
@@ -62,10 +72,10 @@ class RestApiStatusHandler {
 		$file_size = null;
 		$mime_type = get_post_mime_type( $attachment_id );
 
-		if ( ! $local_deleted ) {
-			$file_path = get_attached_file( $attachment_id );
-			if ( $file_path && file_exists( $file_path ) ) {
-				$file_size = filesize( $file_path );
+		if ( $local_exists ) {
+			$size = filesize( $file_path );
+			if ( false !== $size ) {
+				$file_size = $size;
 			}
 		}
 
@@ -75,10 +85,10 @@ class RestApiStatusHandler {
 				'offloaded'   => $is_offloaded,
 				'urls'        => array(
 					'local' => $local_url,
-					'r2'    => $r2_url ?: null,
+					'r2'    => $r2_url ? $r2_url : null,
 					'cdn'   => $cdn_url,
 				),
-				'local_exists' => ! $local_deleted,
+				'local_exists' => $local_exists,
 				'mime_type'    => $mime_type,
 				'file_size'    => $file_size,
 				'width'        => $metadata['width'] ?? null,

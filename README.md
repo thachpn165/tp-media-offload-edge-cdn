@@ -1,4 +1,4 @@
-# CF R2 Offload & CDN
+# ThachPham Offload & CDN for Cloudflare R2
 
 <p align="center">
   <img src="https://img.shields.io/badge/WP-6.0%2B-21759b?logo=wordpress" alt="WordPress 6.0+">
@@ -66,7 +66,7 @@ A production-ready WordPress plugin for offloading media to Cloudflare R2 with a
 ```bash
 ./scripts/build.sh clean       # Clean build directories
 ./scripts/build.sh build       # Build to dist/
-./scripts/build.sh zip         # Create ZIP archive (cf-r2-offload-cdn-VERSION.zip)
+./scripts/build.sh zip         # Create ZIP archive (thachpham-offload-cdn-cloudflare-r2-VERSION.zip)
 ./scripts/build.sh deploy-svn  # Deploy to SVN structure
 ./scripts/build.sh version X.X # Bump version
 ```

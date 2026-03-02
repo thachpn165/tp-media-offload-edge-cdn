@@ -1,10 +1,10 @@
-# Vietnamese translations for CloudFlare R2 Offload & CDN plugin.
+# Vietnamese translations for ThachPham Offload & CDN for Cloudflare R2 plugin.
 # Copyright (C) 2026 ThachPham
 # This file is distributed under the GPL-2.0+.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: CloudFlare R2 Offload & CDN 1.0.0\n"
+"Project-Id-Version: ThachPham Offload & CDN for Cloudflare R2 1.0.0\n"
 "Report-Msgid-Bugs-To: https://thachpham.com/contact\n"
 "POT-Creation-Date: 2026-01-29T11:26:00+07:00\n"
 "PO-Revision-Date: 2026-01-29T11:26:00+07:00\n"
@@ -16,11 +16,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-msgid "CF R2 Offload & CDN"
-msgstr "CloudFlare R2 Offload & CDN"
+msgid "ThachPham Offload & CDN for Cloudflare R2"
+msgstr "ThachPham Offload & CDN for Cloudflare R2"
 
-msgid "CF R2 Offload & CDN Settings"
-msgstr "Cài đặt CloudFlare R2 Offload & CDN"
+msgid "ThachPham Offload & CDN for Cloudflare R2 Settings"
+msgstr "Cài đặt ThachPham Offload & CDN for Cloudflare R2"
 
 msgid "Dashboard"
 msgstr "Bảng điều khiển"

@@ -29,6 +29,11 @@ class BulkOperationAjaxHandler {
 	use AjaxSecurityTrait;
 
 	/**
+	 * Batch size for querying non-offloaded attachments.
+	 */
+	private const OFFLOAD_QUERY_BATCH_SIZE = 500;
+
+	/**
 	 * QueueManager instance.
 	 *
 	 * @var QueueManager
@@ -84,23 +89,7 @@ class BulkOperationAjaxHandler {
 		$this->verify_manage_options();
 		$this->queue_manager->clear_old_items();
 
-		$attachments = get_posts(
-			array(
-				'post_type'      => 'attachment',
-				'post_status'    => 'inherit',
-				'posts_per_page' => -1,
-				'fields'         => 'ids',
-				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Required to find non-offloaded attachments.
-				'meta_query'     => array(
-					array(
-						'key'     => MetaKeys::OFFLOADED,
-						'compare' => 'NOT EXISTS',
-					),
-				),
-			)
-		);
-
-		$queued = $this->enqueue_items( $attachments, QueueAction::OFFLOAD, true );
+		$queued = $this->enqueue_non_offloaded_attachments();
 		$this->send_queue_success( $queued, 'offload' );
 	}
 
@@ -219,13 +208,13 @@ class BulkOperationAjaxHandler {
 	private function get_cancel_message( string $action ): string {
 		switch ( $action ) {
 			case QueueAction::OFFLOAD:
-				return __( 'Bulk offload cancelled.', 'cf-r2-offload-cdn' );
+				return __( 'Bulk offload cancelled.', 'thachpham-offload-cdn-cloudflare-r2' );
 			case QueueAction::RESTORE:
-				return __( 'Bulk restore cancelled.', 'cf-r2-offload-cdn' );
+				return __( 'Bulk restore cancelled.', 'thachpham-offload-cdn-cloudflare-r2' );
 			case QueueAction::DELETE_LOCAL:
-				return __( 'Bulk delete cancelled.', 'cf-r2-offload-cdn' );
+				return __( 'Bulk delete cancelled.', 'thachpham-offload-cdn-cloudflare-r2' );
 			default:
-				return __( 'Operation cancelled.', 'cf-r2-offload-cdn' );
+				return __( 'Operation cancelled.', 'thachpham-offload-cdn-cloudflare-r2' );
 		}
 	}
 
@@ -238,13 +227,13 @@ class BulkOperationAjaxHandler {
 	private function get_done_message( string $action ): string {
 		switch ( $action ) {
 			case QueueAction::OFFLOAD:
-				return __( 'All items processed.', 'cf-r2-offload-cdn' );
+				return __( 'All items processed.', 'thachpham-offload-cdn-cloudflare-r2' );
 			case QueueAction::RESTORE:
-				return __( 'All items restored.', 'cf-r2-offload-cdn' );
+				return __( 'All items restored.', 'thachpham-offload-cdn-cloudflare-r2' );
 			case QueueAction::DELETE_LOCAL:
-				return __( 'All local files deleted.', 'cf-r2-offload-cdn' );
+				return __( 'All local files deleted.', 'thachpham-offload-cdn-cloudflare-r2' );
 			default:
-				return __( 'Operation completed.', 'cf-r2-offload-cdn' );
+				return __( 'Operation completed.', 'thachpham-offload-cdn-cloudflare-r2' );
 		}
 	}
 
@@ -268,7 +257,7 @@ class BulkOperationAjaxHandler {
 			array( '%s' )
 		);
 
-		wp_send_json_success( array( 'message' => __( 'Bulk offload cancelled.', 'cf-r2-offload-cdn' ) ) );
+		wp_send_json_success( array( 'message' => __( 'Bulk offload cancelled.', 'thachpham-offload-cdn-cloudflare-r2' ) ) );
 	}
 
 	/**
@@ -276,6 +265,7 @@ class BulkOperationAjaxHandler {
 	 */
 	public function ajax_get_bulk_progress(): void {
 		$this->verify_ajax_nonce();
+		$this->verify_manage_options();
 
 		$progress = $this->progress_service->get_progress();
 		wp_send_json_success( $progress );
@@ -286,6 +276,7 @@ class BulkOperationAjaxHandler {
 	 */
 	public function ajax_get_bulk_counts(): void {
 		$this->verify_ajax_nonce();
+		$this->verify_manage_options();
 
 		// Clear dashboard stats cache first to ensure fresh data.
 		delete_transient( TransientKeys::DASHBOARD_STATS );
@@ -316,7 +307,7 @@ class BulkOperationAjaxHandler {
 		$item_id = isset( $_POST['item_id'] ) ? absint( $_POST['item_id'] ) : 0;
 
 		if ( ! $item_id ) {
-			wp_send_json_error( array( 'message' => __( 'Invalid item ID.', 'cf-r2-offload-cdn' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Invalid item ID.', 'thachpham-offload-cdn-cloudflare-r2' ) ) );
 		}
 
 		global $wpdb;
@@ -338,9 +329,9 @@ class BulkOperationAjaxHandler {
 			// Clear stats cache.
 			delete_transient( TransientKeys::DASHBOARD_STATS );
 
-			wp_send_json_success( array( 'message' => __( 'Item cancelled.', 'cf-r2-offload-cdn' ) ) );
+			wp_send_json_success( array( 'message' => __( 'Item cancelled.', 'thachpham-offload-cdn-cloudflare-r2' ) ) );
 		} else {
-			wp_send_json_error( array( 'message' => __( 'Could not cancel item. It may already be processing.', 'cf-r2-offload-cdn' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Could not cancel item. It may already be processing.', 'thachpham-offload-cdn-cloudflare-r2' ) ) );
 		}
 	}
 
@@ -373,12 +364,60 @@ class BulkOperationAjaxHandler {
 			array(
 				'message'   => sprintf(
 					/* translators: %d: number of items cancelled */
-					__( '%d pending items cancelled.', 'cf-r2-offload-cdn' ),
-					$updated ?: 0
+					__( '%d pending items cancelled.', 'thachpham-offload-cdn-cloudflare-r2' ),
+					$updated ? $updated : 0
 				),
-				'cancelled' => $updated ?: 0,
+				'cancelled' => $updated ? $updated : 0,
 			)
 		);
+	}
+
+	/**
+	 * Enqueue all non-offloaded attachments in batches to avoid loading all IDs into memory.
+	 *
+	 * @return int Number of queued items.
+	 */
+	private function enqueue_non_offloaded_attachments(): int {
+		global $wpdb;
+
+		$queued  = 0;
+		$last_id = 0;
+
+		while ( true ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$attachments = $wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT p.ID
+					 FROM {$wpdb->posts} p
+					 LEFT JOIN {$wpdb->postmeta} pm
+						ON p.ID = pm.post_id
+						AND pm.meta_key = %s
+						AND pm.meta_value = '1'
+					 WHERE p.post_type = 'attachment'
+						AND p.post_status = 'inherit'
+						AND p.ID > %d
+						AND pm.post_id IS NULL
+					 ORDER BY p.ID ASC
+					 LIMIT %d",
+					MetaKeys::OFFLOADED,
+					$last_id,
+					self::OFFLOAD_QUERY_BATCH_SIZE
+				)
+			);
+
+			if ( empty( $attachments ) ) {
+				break;
+			}
+
+			$queued  += $this->enqueue_items( $attachments, QueueAction::OFFLOAD, true );
+			$last_id  = (int) end( $attachments );
+
+			if ( count( $attachments ) < self::OFFLOAD_QUERY_BATCH_SIZE ) {
+				break;
+			}
+		}
+
+		return $queued;
 	}
 
 	/**
@@ -390,17 +429,57 @@ class BulkOperationAjaxHandler {
 	 * @return int Number of items queued.
 	 */
 	private function enqueue_items( array $attachments, string $action, bool $check_exists = false ): int {
-		$queued = 0;
+		$queued        = 0;
+		$existing_ids  = $check_exists ? $this->get_pending_attachment_lookup( $attachments ) : array();
+
 		foreach ( $attachments as $attachment_id ) {
-			if ( $check_exists && $this->queue_manager->item_exists( (int) $attachment_id ) ) {
+			$attachment_id = (int) $attachment_id;
+
+			if ( isset( $existing_ids[ $attachment_id ] ) ) {
 				continue;
 			}
-			$this->queue_manager->enqueue( (int) $attachment_id, $action );
+
+			$this->queue_manager->enqueue( $attachment_id, $action );
 			++$queued;
 		}
 		delete_transient( TransientKeys::BULK_CANCELLED );
 
 		return $queued;
+	}
+
+	/**
+	 * Build lookup map of attachment IDs already pending in queue.
+	 *
+	 * @param array $attachments Attachment IDs.
+	 * @return array<int, bool> Lookup array where key is attachment ID.
+	 */
+	private function get_pending_attachment_lookup( array $attachments ): array {
+		global $wpdb;
+
+		$attachment_ids = array_values( array_filter( array_map( 'absint', $attachments ) ) );
+		if ( empty( $attachment_ids ) ) {
+			return array();
+		}
+
+		$ids_sql = implode( ',', $attachment_ids );
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- IDs are sanitized with absint.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$existing_ids = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT attachment_id FROM {$wpdb->prefix}cfr2_offload_queue
+				 WHERE status = %s AND attachment_id IN ({$ids_sql})",
+				QueueStatus::PENDING
+			)
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		$lookup = array();
+		foreach ( $existing_ids as $attachment_id ) {
+			$lookup[ (int) $attachment_id ] = true;
+		}
+
+		return $lookup;
 	}
 
 	/**
@@ -414,7 +493,7 @@ class BulkOperationAjaxHandler {
 			array(
 				'message' => sprintf(
 					/* translators: %1$d: number of files, %2$s: action */
-					__( '%1$d files queued for %2$s.', 'cf-r2-offload-cdn' ),
+					__( '%1$d files queued for %2$s.', 'thachpham-offload-cdn-cloudflare-r2' ),
 					$queued,
 					$action
 				),

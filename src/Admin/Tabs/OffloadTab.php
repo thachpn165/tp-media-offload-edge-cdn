@@ -22,13 +22,13 @@ class OffloadTab {
 	public static function render( array $settings ): void {
 		?>
 		<div class="cloudflare-r2-offload-cdn-tab-content" id="tab-offload">
-			<h2><?php esc_html_e( 'Offload Settings', 'cf-r2-offload-cdn' ); ?></h2>
-			<p class="description"><?php esc_html_e( 'Configure how media files are offloaded to R2 storage.', 'cf-r2-offload-cdn' ); ?></p>
+			<h2><?php esc_html_e( 'Offload Settings', 'thachpham-offload-cdn-cloudflare-r2' ); ?></h2>
+			<p class="description"><?php esc_html_e( 'Configure how media files are offloaded to R2 storage.', 'thachpham-offload-cdn-cloudflare-r2' ); ?></p>
 
 			<table class="form-table">
 				<tr>
 					<th scope="row">
-						<label for="auto_offload"><?php esc_html_e( 'Auto-Offload on Upload', 'cf-r2-offload-cdn' ); ?></label>
+						<label for="auto_offload"><?php esc_html_e( 'Auto-Offload on Upload', 'thachpham-offload-cdn-cloudflare-r2' ); ?></label>
 					</th>
 					<td>
 						<input type="hidden" name="auto_offload" value="0" />
@@ -37,31 +37,31 @@ class OffloadTab {
 								<?php checked( 1, $settings['auto_offload'] ?? 0 ); ?> />
 							<span class="cloudflare-r2-offload-cdn-toggle-slider"></span>
 						</label>
-						<p class="description"><?php esc_html_e( 'Automatically offload media files to R2 when uploaded.', 'cf-r2-offload-cdn' ); ?></p>
+						<p class="description"><?php esc_html_e( 'Automatically offload media files to R2 when uploaded.', 'thachpham-offload-cdn-cloudflare-r2' ); ?></p>
 					</td>
 				</tr>
 				<tr>
 					<th scope="row">
-						<label for="batch_size"><?php esc_html_e( 'Batch Size', 'cf-r2-offload-cdn' ); ?></label>
+						<label for="batch_size"><?php esc_html_e( 'Batch Size', 'thachpham-offload-cdn-cloudflare-r2' ); ?></label>
 					</th>
 					<td>
 						<select id="batch_size" name="batch_size" class="regular-text">
 							<option value="10" <?php selected( 10, $settings['batch_size'] ?? 25 ); ?>>
-								<?php esc_html_e( '10 files per batch', 'cf-r2-offload-cdn' ); ?>
+								<?php esc_html_e( '10 files per batch', 'thachpham-offload-cdn-cloudflare-r2' ); ?>
 							</option>
 							<option value="25" <?php selected( 25, $settings['batch_size'] ?? 25 ); ?>>
-								<?php esc_html_e( '25 files per batch', 'cf-r2-offload-cdn' ); ?>
+								<?php esc_html_e( '25 files per batch', 'thachpham-offload-cdn-cloudflare-r2' ); ?>
 							</option>
 							<option value="50" <?php selected( 50, $settings['batch_size'] ?? 25 ); ?>>
-								<?php esc_html_e( '50 files per batch', 'cf-r2-offload-cdn' ); ?>
+								<?php esc_html_e( '50 files per batch', 'thachpham-offload-cdn-cloudflare-r2' ); ?>
 							</option>
 						</select>
-						<p class="description"><?php esc_html_e( 'Number of files to process in each batch during bulk offload.', 'cf-r2-offload-cdn' ); ?></p>
+						<p class="description"><?php esc_html_e( 'Number of files to process in each batch during bulk offload.', 'thachpham-offload-cdn-cloudflare-r2' ); ?></p>
 					</td>
 				</tr>
 				<tr>
 					<th scope="row">
-						<label for="keep_local_files"><?php esc_html_e( 'Keep Local Files', 'cf-r2-offload-cdn' ); ?></label>
+						<label for="keep_local_files"><?php esc_html_e( 'Keep Local Files', 'thachpham-offload-cdn-cloudflare-r2' ); ?></label>
 					</th>
 					<td>
 						<input type="hidden" name="keep_local_files" value="0" />
@@ -70,12 +70,12 @@ class OffloadTab {
 								<?php checked( 1, $settings['keep_local_files'] ?? 1 ); ?> />
 							<span class="cloudflare-r2-offload-cdn-toggle-slider"></span>
 						</label>
-						<p class="description"><?php esc_html_e( 'Keep local copies of files after offloading to R2. Disable to save disk space (files will be served from R2/CDN).', 'cf-r2-offload-cdn' ); ?></p>
+						<p class="description"><?php esc_html_e( 'Keep local copies of files after offloading to R2. Disable to save disk space (files will be served from R2/CDN).', 'thachpham-offload-cdn-cloudflare-r2' ); ?></p>
 					</td>
 				</tr>
 				<tr>
 					<th scope="row">
-						<label for="sync_delete"><?php esc_html_e( 'Sync Delete', 'cf-r2-offload-cdn' ); ?></label>
+						<label for="sync_delete"><?php esc_html_e( 'Sync Delete', 'thachpham-offload-cdn-cloudflare-r2' ); ?></label>
 					</th>
 					<td>
 						<input type="hidden" name="sync_delete" value="0" />
@@ -84,7 +84,7 @@ class OffloadTab {
 								<?php checked( 1, $settings['sync_delete'] ?? 0 ); ?> />
 							<span class="cloudflare-r2-offload-cdn-toggle-slider"></span>
 						</label>
-						<p class="description"><?php esc_html_e( 'When deleting media from WordPress, also delete from R2 storage. Disable to keep R2 copies as backup.', 'cf-r2-offload-cdn' ); ?></p>
+						<p class="description"><?php esc_html_e( 'When deleting media from WordPress, also delete from R2 storage. Disable to keep R2 copies as backup.', 'thachpham-offload-cdn-cloudflare-r2' ); ?></p>
 					</td>
 				</tr>
 			</table>

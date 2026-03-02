@@ -41,7 +41,7 @@ class RestApiIntegration implements HookableInterface {
 			array(
 				'methods'             => 'GET',
 				'callback'            => array( RestApiStatusHandler::class, 'get_attachment' ),
-				'permission_callback' => '__return_true',
+				'permission_callback' => array( RestApiHelper::class, 'check_attachment_permission' ),
 				'args'                => array(
 					'id' => array(
 						'required'          => true,

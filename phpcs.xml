@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<ruleset name="CloudFlare R2 Offload CDN">
-	<description>WordPress Coding Standards for CloudFlare R2 Offload CDN plugin</description>
+<ruleset name="ThachPham Offload and CDN for Cloudflare R2">
+	<description>WordPress Coding Standards for ThachPham Offload and CDN for Cloudflare R2 plugin</description>
 
 	<!-- Scan these files -->
 	<file>./src</file>
@@ -26,7 +26,7 @@
 	<rule ref="WordPress.WP.I18n">
 		<properties>
 			<property name="text_domain" type="array">
-				<element value="cloudflare-r2-offload-cdn"/>
+				<element value="thachpham-offload-cdn-cloudflare-r2"/>
 			</property>
 		</properties>
 	</rule>

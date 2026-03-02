@@ -45,7 +45,7 @@ class WorkerAjaxHandler {
 
 		if ( false === $nonce_valid ) {
 			wp_send_json_error(
-				array( 'message' => __( 'Security check failed.', 'cf-r2-offload-cdn' ) ),
+				array( 'message' => __( 'Security check failed.', 'thachpham-offload-cdn-cloudflare-r2' ) ),
 				403
 			);
 			return false;
@@ -61,7 +61,7 @@ class WorkerAjaxHandler {
 	 */
 	private function check_permissions(): bool {
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'cf-r2-offload-cdn' ) ), 403 );
+			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'thachpham-offload-cdn-cloudflare-r2' ) ), 403 );
 			return false;
 		}
 		return true;
@@ -78,14 +78,14 @@ class WorkerAjaxHandler {
 
 		// Validate required fields.
 		if ( empty( $settings['cf_api_token'] ) || empty( $settings['r2_account_id'] ) ) {
-			wp_send_json_error( array( 'message' => __( 'Missing Cloudflare API Token or Account ID.', 'cf-r2-offload-cdn' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Missing Cloudflare API Token or Account ID.', 'thachpham-offload-cdn-cloudflare-r2' ) ) );
 		}
 
 		// Validate R2 bucket is configured.
 		if ( empty( $settings['r2_bucket'] ) ) {
 			wp_send_json_error(
 				array(
-					'message' => __( 'R2 Bucket name is required. Please configure it in the Storage tab first.', 'cf-r2-offload-cdn' ),
+					'message' => __( 'R2 Bucket name is required. Please configure it in the Storage tab first.', 'thachpham-offload-cdn-cloudflare-r2' ),
 				)
 			);
 		}
@@ -116,7 +116,7 @@ class WorkerAjaxHandler {
 
 			wp_send_json_success(
 				array(
-					'message'  => __( 'Worker deployed successfully!', 'cf-r2-offload-cdn' ),
+					'message'  => __( 'Worker deployed successfully!', 'thachpham-offload-cdn-cloudflare-r2' ),
 					'steps'    => $result['steps'],
 					'warnings' => $result['warnings'] ?? array(),
 				)
@@ -154,7 +154,7 @@ class WorkerAjaxHandler {
 			unset( $settings['worker_name'], $settings['worker_deployed_at'] );
 			update_option( Settings::OPTION_KEY, $settings );
 
-			wp_send_json_success( array( 'message' => __( 'Worker removed.', 'cf-r2-offload-cdn' ) ) );
+			wp_send_json_success( array( 'message' => __( 'Worker removed.', 'thachpham-offload-cdn-cloudflare-r2' ) ) );
 		} else {
 			wp_send_json_error( array( 'message' => $result['errors'][0]['message'] ?? 'Unknown error' ) );
 		}

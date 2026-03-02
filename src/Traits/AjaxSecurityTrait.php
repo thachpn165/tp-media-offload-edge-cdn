@@ -36,7 +36,7 @@ trait AjaxSecurityTrait {
 
 		if ( ! $is_valid ) {
 			wp_send_json_error(
-				array( 'message' => __( 'Security check failed.', 'cf-r2-offload-cdn' ) ),
+				array( 'message' => __( 'Security check failed.', 'thachpham-offload-cdn-cloudflare-r2' ) ),
 				403
 			);
 		}
@@ -52,7 +52,7 @@ trait AjaxSecurityTrait {
 	protected function verify_manage_options(): bool {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error(
-				array( 'message' => __( 'Permission denied.', 'cf-r2-offload-cdn' ) ),
+				array( 'message' => __( 'Permission denied.', 'thachpham-offload-cdn-cloudflare-r2' ) ),
 				403
 			);
 			return false;

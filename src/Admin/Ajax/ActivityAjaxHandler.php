@@ -48,7 +48,7 @@ class ActivityAjaxHandler {
 
 		if ( false === $nonce_valid ) {
 			wp_send_json_error(
-				array( 'message' => __( 'Security check failed.', 'cf-r2-offload-cdn' ) ),
+				array( 'message' => __( 'Security check failed.', 'thachpham-offload-cdn-cloudflare-r2' ) ),
 				403
 			);
 			return false;
@@ -64,7 +64,7 @@ class ActivityAjaxHandler {
 	 */
 	private function check_permissions(): bool {
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'cf-r2-offload-cdn' ) ), 403 );
+			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'thachpham-offload-cdn-cloudflare-r2' ) ), 403 );
 			return false;
 		}
 		return true;
@@ -149,7 +149,7 @@ class ActivityAjaxHandler {
 			array(
 				'message' => sprintf(
 					/* translators: %d: number of items */
-					__( '%d items queued for retry.', 'cf-r2-offload-cdn' ),
+					__( '%d items queued for retry.', 'thachpham-offload-cdn-cloudflare-r2' ),
 					$queued
 				),
 				'queued'  => (int) $queued,
@@ -169,7 +169,7 @@ class ActivityAjaxHandler {
 		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
 		if ( ! $attachment_id ) {
-			wp_send_json_error( array( 'message' => __( 'Invalid attachment ID.', 'cf-r2-offload-cdn' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Invalid attachment ID.', 'thachpham-offload-cdn-cloudflare-r2' ) ) );
 		}
 
 		global $wpdb;
@@ -189,9 +189,9 @@ class ActivityAjaxHandler {
 		);
 
 		if ( $updated ) {
-			wp_send_json_success( array( 'message' => __( 'Item queued for retry.', 'cf-r2-offload-cdn' ) ) );
+			wp_send_json_success( array( 'message' => __( 'Item queued for retry.', 'thachpham-offload-cdn-cloudflare-r2' ) ) );
 		} else {
-			wp_send_json_error( array( 'message' => __( 'Failed to queue item.', 'cf-r2-offload-cdn' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Failed to queue item.', 'thachpham-offload-cdn-cloudflare-r2' ) ) );
 		}
 	}
 
@@ -204,6 +204,6 @@ class ActivityAjaxHandler {
 
 		BulkOperationLogger::clear();
 
-		wp_send_json_success( array( 'message' => __( 'Activity log cleared.', 'cf-r2-offload-cdn' ) ) );
+		wp_send_json_success( array( 'message' => __( 'Activity log cleared.', 'thachpham-offload-cdn-cloudflare-r2' ) ) );
 	}
 }

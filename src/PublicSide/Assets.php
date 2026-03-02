@@ -30,7 +30,7 @@ class Assets implements HookableInterface {
 	 * @param string $hook Current admin page hook.
 	 */
 	public function enqueue_admin_assets( string $hook ): void {
-		$is_plugin_page = strpos( $hook, 'cf-r2-offload-cdn' ) !== false;
+		$is_plugin_page = strpos( $hook, 'thachpham-offload-cdn-cloudflare-r2' ) !== false;
 		$is_media_page  = in_array( $hook, array( 'upload.php', 'post.php' ), true );
 
 		// Check if editing an attachment.
@@ -69,10 +69,10 @@ class Assets implements HookableInterface {
 				'ajaxUrl' => admin_url( 'admin-ajax.php' ),
 				'nonce'   => wp_create_nonce( 'cloudflare_r2_offload_cdn_save_settings' ),
 				'strings' => array(
-					'confirm' => __( 'Are you sure?', 'cf-r2-offload-cdn' ),
-					'saving'  => __( 'Saving...', 'cf-r2-offload-cdn' ),
-					'saved'   => __( 'Settings saved.', 'cf-r2-offload-cdn' ),
-					'error'   => __( 'An error occurred. Please try again.', 'cf-r2-offload-cdn' ),
+					'confirm' => __( 'Are you sure?', 'thachpham-offload-cdn-cloudflare-r2' ),
+					'saving'  => __( 'Saving...', 'thachpham-offload-cdn-cloudflare-r2' ),
+					'saved'   => __( 'Settings saved.', 'thachpham-offload-cdn-cloudflare-r2' ),
+					'error'   => __( 'An error occurred. Please try again.', 'thachpham-offload-cdn-cloudflare-r2' ),
 				),
 			)
 		);

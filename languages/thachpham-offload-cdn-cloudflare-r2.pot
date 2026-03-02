@@ -2,7 +2,7 @@
 # This file is distributed under the GPL-2.0+.
 msgid ""
 msgstr ""
-"Project-Id-Version: CloudFlare R2 Offload & CDN 1.0.0\n"
+"Project-Id-Version: ThachPham Offload & CDN for Cloudflare R2 1.0.0\n"
 "Report-Msgid-Bugs-To: https://thachpham.com/contact\n"
 "POT-Creation-Date: 2026-01-29T11:26:00+07:00\n"
 "MIME-Version: 1.0\n"
@@ -13,11 +13,11 @@ msgstr ""
 "Language-Team: LANGUAGE <LL@li.org>\n"
 
 #: src/Admin/AdminMenu.php
-msgid "CF R2 Offload & CDN"
+msgid "ThachPham Offload & CDN for Cloudflare R2"
 msgstr ""
 
 #: src/Admin/AdminMenu.php
-msgid "CF R2 Offload & CDN Settings"
+msgid "ThachPham Offload & CDN for Cloudflare R2 Settings"
 msgstr ""
 
 #: src/Admin/Pages/DashboardPage.php

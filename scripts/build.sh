@@ -1,17 +1,18 @@
 #!/bin/bash
 
 # =============================================================================
-# CloudFlare R2 Offload & CDN Build Script
+# ThachPham Offload & CDN for Cloudflare R2 Build Script
 # =============================================================================
 
 set -e
 
 # Configuration
-PLUGIN_SLUG="cloudflare-r2-offload-cdn"
-PLUGIN_VERSION=$(grep -m1 "Version:" ${PLUGIN_SLUG}.php 2>/dev/null | sed 's/.*Version:[[:space:]]*//' | tr -d ' ' || echo "1.0.0")
+PLUGIN_SLUG="thachpham-offload-cdn-cloudflare-r2"
+MAIN_PLUGIN_FILE="cloudflare-r2-offload-cdn.php"
+PLUGIN_VERSION=$(grep -m1 "Version:" "$MAIN_PLUGIN_FILE" 2>/dev/null | sed 's/.*Version:[[:space:]]*//' | tr -d ' ' || echo "1.0.0")
 BUILD_DIR="dist"
 SVN_DIR="svn"
-ZIP_FILE="cf-r2-offload-cdn-${PLUGIN_VERSION}.zip"
+ZIP_FILE="thachpham-offload-cdn-cloudflare-r2-${PLUGIN_VERSION}.zip"
 
 # Colors
 RED='\033[0;31m'
@@ -180,7 +181,8 @@ cmd_build() {
 
     # Files to include
     local include_files=(
-        "${PLUGIN_SLUG}.php"
+        "$MAIN_PLUGIN_FILE"
+        "composer.json"
         "uninstall.php"
         "readme.txt"
         "LICENSE.txt"
@@ -306,11 +308,9 @@ cmd_version() {
     log_info "Bumping version to $new_version..."
 
     # Update main plugin file
-    if [ -f "${PLUGIN_SLUG}.php" ]; then
-        # Convert slug to uppercase constant name (cloudflare-r2-offload-cdn -> CLOUDFLARE_R2_OFFLOAD_CDN)
-        local const_prefix=$(echo "$PLUGIN_SLUG" | tr '[:lower:]-' '[:upper:]_')
-        sed -i.bak "s/Version:.*$/Version:           $new_version/" "${PLUGIN_SLUG}.php"
-        sed -i.bak "s/define( '${const_prefix}_VERSION', '.*' );/define( '${const_prefix}_VERSION', '$new_version' );/" "${PLUGIN_SLUG}.php"
+    if [ -f "$MAIN_PLUGIN_FILE" ]; then
+        sed -i.bak "s/^ \\* Version:.*$/ * Version:           $new_version/" "$MAIN_PLUGIN_FILE"
+        sed -i.bak "s/define( 'CFR2_VERSION', '.*' );/define( 'CFR2_VERSION', '$new_version' );/" "$MAIN_PLUGIN_FILE"
     fi
 
     # Update readme.txt
@@ -332,7 +332,7 @@ cmd_version() {
 # Show help
 cmd_help() {
     echo ""
-    echo "CloudFlare R2 Offload & CDN Build Script"
+    echo "ThachPham Offload & CDN for Cloudflare R2 Build Script"
     echo ""
     echo "Usage: ./scripts/build.sh [command]"
     echo ""

@@ -23,57 +23,68 @@ class DeactivationHandler implements HookableInterface {
 	 * Register hooks.
 	 */
 	public function register_hooks(): void {
-		add_action( 'admin_footer-plugins.php', array( $this, 'add_deactivation_dialog' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_deactivation_dialog_script' ) );
 		add_action( 'wp_ajax_cfr2_cleanup_data', array( $this, 'ajax_cleanup_data' ) );
 	}
 
 	/**
-	 * Add deactivation dialog JavaScript.
+	 * Enqueue deactivation dialog JavaScript.
+	 *
+	 * @param string $hook Current admin hook suffix.
 	 */
-	public function add_deactivation_dialog(): void {
-		$plugin_file = 'cloudflare-r2-offload-cdn/cloudflare-r2-offload-cdn.php';
-		$nonce       = wp_create_nonce( 'cfr2_cleanup_nonce' );
-		?>
-		<script type="text/javascript">
-		jQuery(document).ready(function($) {
-			var pluginRow = $('tr[data-plugin="<?php echo esc_js( $plugin_file ); ?>"]');
-			var deactivateLink = pluginRow.find('.deactivate a');
-			var originalHref = deactivateLink.attr('href');
+	public function enqueue_deactivation_dialog_script( string $hook ): void {
+		if ( 'plugins.php' !== $hook ) {
+			return;
+		}
 
-			deactivateLink.on('click', function(e) {
-				e.preventDefault();
+		$config = array(
+			'ajaxUrl'        => admin_url( 'admin-ajax.php' ),
+			'pluginFile'     => \CFR2_BASENAME,
+			'cleanupNonce'   => wp_create_nonce( 'cfr2_cleanup_nonce' ),
+			'confirmMessage' => __(
+				"Do you want to delete all plugin data?\n\n- Click OK to delete all settings, database tables, and media metadata\n- Click Cancel to keep data (you can reinstall later)\n\nNote: Files on R2 storage will not be deleted.",
+				'thachpham-offload-cdn-cloudflare-r2'
+			),
+		);
 
-				var confirmed = confirm(
-					'Do you want to delete all plugin data?\n\n' +
-					'• Click OK to DELETE all settings, database tables, and media metadata\n' +
-					'• Click Cancel to keep data (you can reinstall later)\n\n' +
-					'Note: Files on R2 storage will NOT be deleted.'
-				);
+		$script = sprintf(
+			<<<'JS'
+jQuery(function($) {
+	const config = %s;
+	const pluginRow = $('tr[data-plugin="' + config.pluginFile + '"]');
+	const deactivateLink = pluginRow.find('.deactivate a');
+	const originalHref = deactivateLink.attr('href');
 
-				if (confirmed) {
-					// User wants to delete data - call cleanup AJAX
-					$.ajax({
-						url: ajaxurl,
-						type: 'POST',
-						data: {
-							action: 'cfr2_cleanup_data',
-							nonce: '<?php echo esc_js( $nonce ); ?>'
-						},
-						success: function() {
-							window.location.href = originalHref;
-						},
-						error: function() {
-							window.location.href = originalHref;
-						}
-					});
-				} else {
-					// User wants to keep data - just deactivate
-					window.location.href = originalHref;
-				}
-			});
+	if (!deactivateLink.length || !originalHref) {
+		return;
+	}
+
+	deactivateLink.on('click', function(event) {
+		event.preventDefault();
+
+		if (!window.confirm(config.confirmMessage)) {
+			window.location.href = originalHref;
+			return;
+		}
+
+		$.ajax({
+			url: config.ajaxUrl,
+			type: 'POST',
+			data: {
+				action: 'cfr2_cleanup_data',
+				nonce: config.cleanupNonce
+			}
+		}).always(function() {
+			window.location.href = originalHref;
 		});
-		</script>
-		<?php
+	});
+});
+JS,
+			wp_json_encode( $config, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT )
+		);
+
+		wp_enqueue_script( 'jquery' );
+		wp_add_inline_script( 'jquery', $script, 'after' );
 	}
 
 	/**
@@ -83,7 +94,10 @@ class DeactivationHandler implements HookableInterface {
 		check_ajax_referer( 'cfr2_cleanup_nonce', 'nonce' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( 'Permission denied' );
+			wp_send_json_error(
+				array( 'message' => __( 'Permission denied.', 'thachpham-offload-cdn-cloudflare-r2' ) ),
+				403
+			);
 		}
 
 		global $wpdb;
@@ -126,6 +140,8 @@ class DeactivationHandler implements HookableInterface {
 		// 6. Clear scheduled cron events.
 		wp_clear_scheduled_hook( 'cfr2_process_queue' );
 
-		wp_send_json_success( 'Data cleaned' );
+		wp_send_json_success(
+			array( 'message' => __( 'Data cleaned.', 'thachpham-offload-cdn-cloudflare-r2' ) )
+		);
 	}
 }

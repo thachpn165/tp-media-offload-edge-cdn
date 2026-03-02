@@ -1,4 +1,4 @@
-=== CF R2 Offload & CDN ===
+=== ThachPham Offload & CDN for Cloudflare R2 ===
 Contributors: thachpn165
 Tags: cloudflare, cdn, media, offload, image optimization
 Requires at least: 6.0
@@ -12,7 +12,7 @@ Offload WordPress media to Cloudflare R2 storage and serve via CDN with automati
 
 == Description ==
 
-**CloudFlare R2 Offload & CDN** is a powerful WordPress plugin that offloads your media files to Cloudflare R2 object storage and serves them through Cloudflare's global CDN network with automatic image optimization.
+**ThachPham Offload & CDN for Cloudflare R2** is a powerful WordPress plugin that offloads your media files to Cloudflare R2 object storage and serves them through Cloudflare's global CDN network with automatic image optimization.
 
 = Key Features =
 
@@ -62,9 +62,9 @@ Offload WordPress media to Cloudflare R2 storage and serve via CDN with automati
 
 == Installation ==
 
-1. Upload the plugin files to `/wp-content/plugins/cloudflare-r2-offload-cdn` or install through WordPress plugins screen
+1. Upload the plugin files to `/wp-content/plugins/thachpham-offload-cdn-cloudflare-r2` or install through WordPress plugins screen
 2. Activate the plugin through the 'Plugins' screen in WordPress
-3. Go to **CloudFlare R2 Offload & CDN** in the admin menu
+3. Go to **ThachPham Offload & CDN for Cloudflare R2** in the admin menu
 
 = Initial Setup =
 
@@ -128,6 +128,28 @@ Delete local files for offloaded media to free disk space.
 
     # Free disk space by removing local copies
     wp cfr2 free-space all
+
+== External services ==
+
+This plugin connects to Cloudflare services to offload media and deliver files via CDN.
+
+= Cloudflare R2 Object Storage =
+
+* **What it is used for:** Store and serve media objects.
+* **Data sent:** Account ID, Access Key ID, Secret Access Key, bucket name, file paths, and media file contents.
+* **When data is sent:** During connection testing, single/bulk offload, restore, and local-file cleanup actions.
+* **Service provider:** Cloudflare, Inc.
+* **Terms of Service:** https://www.cloudflare.com/website-terms/
+* **Privacy Policy:** https://www.cloudflare.com/privacypolicy/
+
+= Cloudflare API (Workers and DNS) =
+
+* **What it is used for:** Deploy/remove Workers, validate DNS records, and enable DNS proxy for CDN routing.
+* **Data sent:** API token, account ID, zone ID, DNS record ID, worker configuration, and configured CDN domain.
+* **When data is sent:** When you click Deploy Worker, Remove Worker, Validate DNS, or Enable Proxy.
+* **Service provider:** Cloudflare, Inc.
+* **Terms of Service:** https://www.cloudflare.com/website-terms/
+* **Privacy Policy:** https://www.cloudflare.com/privacypolicy/
 
 == Frequently Asked Questions ==
 
@@ -206,7 +228,7 @@ Initial release. Please backup your database before installing.
 This plugin:
 * Stores your Cloudflare API credentials encrypted in your WordPress database
 * Uploads your media files to your Cloudflare R2 bucket
-* Does not collect or send any data to third parties
+* Sends required API data directly to Cloudflare services to provide plugin functionality
 * Does not include any tracking or analytics
 
 Your data stays between your WordPress site and your Cloudflare account.

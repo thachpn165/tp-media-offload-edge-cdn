@@ -24,8 +24,8 @@ class SystemInfoTab {
 		$settings = get_option( 'cloudflare_r2_offload_cdn_settings', array() );
 		?>
 		<div class="cloudflare-r2-offload-cdn-tab-content" id="tab-system-info">
-			<h2><?php esc_html_e( 'System Information', 'cf-r2-offload-cdn' ); ?></h2>
-			<p class="description"><?php esc_html_e( 'System status and debug information for troubleshooting.', 'cf-r2-offload-cdn' ); ?></p>
+			<h2><?php esc_html_e( 'System Information', 'thachpham-offload-cdn-cloudflare-r2' ); ?></h2>
+			<p class="description"><?php esc_html_e( 'System status and debug information for troubleshooting.', 'thachpham-offload-cdn-cloudflare-r2' ); ?></p>
 
 			<?php self::render_system_status( $settings ); ?>
 			<?php self::render_debug_info( $settings ); ?>
@@ -42,7 +42,7 @@ class SystemInfoTab {
 		$statuses = self::get_system_statuses( $settings );
 		?>
 		<div class="settings-section cfr2-system-status">
-			<h3><?php esc_html_e( 'System Status', 'cf-r2-offload-cdn' ); ?></h3>
+			<h3><?php esc_html_e( 'System Status', 'thachpham-offload-cdn-cloudflare-r2' ); ?></h3>
 			<table class="widefat cfr2-status-table">
 				<tbody>
 					<?php foreach ( $statuses as $status ) : ?>
@@ -78,7 +78,7 @@ class SystemInfoTab {
 
 		// Plugin version.
 		$statuses[] = array(
-			'label'  => __( 'Plugin Version', 'cf-r2-offload-cdn' ),
+			'label'  => __( 'Plugin Version', 'thachpham-offload-cdn-cloudflare-r2' ),
 			'value'  => \CFR2_VERSION,
 			'status' => 'info',
 		);
@@ -88,7 +88,7 @@ class SystemInfoTab {
 		$php_min     = '8.0';
 		$php_status  = version_compare( $php_version, $php_min, '>=' ) ? 'ok' : 'error';
 		$statuses[]  = array(
-			'label'  => __( 'PHP Version', 'cf-r2-offload-cdn' ),
+			'label'  => __( 'PHP Version', 'thachpham-offload-cdn-cloudflare-r2' ),
 			'value'  => $php_version . ( 'error' === $php_status ? " (min: {$php_min})" : '' ),
 			'status' => $php_status,
 		);
@@ -98,7 +98,7 @@ class SystemInfoTab {
 		$wp_min     = '6.0';
 		$wp_status  = version_compare( $wp_version, $wp_min, '>=' ) ? 'ok' : 'warning';
 		$statuses[] = array(
-			'label'  => __( 'WordPress Version', 'cf-r2-offload-cdn' ),
+			'label'  => __( 'WordPress Version', 'thachpham-offload-cdn-cloudflare-r2' ),
 			'value'  => $wp_version,
 			'status' => $wp_status,
 		);
@@ -106,48 +106,48 @@ class SystemInfoTab {
 		// R2 Connection.
 		$r2_configured = ! empty( $settings['r2_account_id'] ) && ! empty( $settings['r2_bucket'] ) && ! empty( $settings['r2_secret_access_key'] );
 		$statuses[]    = array(
-			'label'  => __( 'R2 Credentials', 'cf-r2-offload-cdn' ),
-			'value'  => $r2_configured ? __( 'Configured', 'cf-r2-offload-cdn' ) : __( 'Not configured', 'cf-r2-offload-cdn' ),
+			'label'  => __( 'R2 Credentials', 'thachpham-offload-cdn-cloudflare-r2' ),
+			'value'  => $r2_configured ? __( 'Configured', 'thachpham-offload-cdn-cloudflare-r2' ) : __( 'Not configured', 'thachpham-offload-cdn-cloudflare-r2' ),
 			'status' => $r2_configured ? 'ok' : 'warning',
 		);
 
 		// Cloudflare API Token.
 		$cf_configured = ! empty( $settings['cf_api_token'] );
 		$statuses[]    = array(
-			'label'  => __( 'Cloudflare API Token', 'cf-r2-offload-cdn' ),
-			'value'  => $cf_configured ? __( 'Configured', 'cf-r2-offload-cdn' ) : __( 'Not configured', 'cf-r2-offload-cdn' ),
+			'label'  => __( 'Cloudflare API Token', 'thachpham-offload-cdn-cloudflare-r2' ),
+			'value'  => $cf_configured ? __( 'Configured', 'thachpham-offload-cdn-cloudflare-r2' ) : __( 'Not configured', 'thachpham-offload-cdn-cloudflare-r2' ),
 			'status' => $cf_configured ? 'ok' : 'warning',
 		);
 
 		// Worker Status.
 		$worker_deployed = ! empty( $settings['worker_deployed'] );
 		$statuses[]      = array(
-			'label'  => __( 'Worker Status', 'cf-r2-offload-cdn' ),
-			'value'  => $worker_deployed ? __( 'Deployed', 'cf-r2-offload-cdn' ) : __( 'Not deployed', 'cf-r2-offload-cdn' ),
+			'label'  => __( 'Worker Status', 'thachpham-offload-cdn-cloudflare-r2' ),
+			'value'  => $worker_deployed ? __( 'Deployed', 'thachpham-offload-cdn-cloudflare-r2' ) : __( 'Not deployed', 'thachpham-offload-cdn-cloudflare-r2' ),
 			'status' => $worker_deployed ? 'ok' : 'warning',
 		);
 
 		// CDN Status.
 		$cdn_enabled = ! empty( $settings['cdn_enabled'] ) && ! empty( $settings['cdn_url'] );
 		$statuses[]  = array(
-			'label'  => __( 'CDN Status', 'cf-r2-offload-cdn' ),
-			'value'  => $cdn_enabled ? __( 'Enabled', 'cf-r2-offload-cdn' ) : __( 'Disabled', 'cf-r2-offload-cdn' ),
+			'label'  => __( 'CDN Status', 'thachpham-offload-cdn-cloudflare-r2' ),
+			'value'  => $cdn_enabled ? __( 'Enabled', 'thachpham-offload-cdn-cloudflare-r2' ) : __( 'Disabled', 'thachpham-offload-cdn-cloudflare-r2' ),
 			'status' => $cdn_enabled ? 'ok' : 'info',
 		);
 
 		// cURL extension.
 		$curl_enabled = function_exists( 'curl_version' );
 		$statuses[]   = array(
-			'label'  => __( 'cURL Extension', 'cf-r2-offload-cdn' ),
-			'value'  => $curl_enabled ? __( 'Enabled', 'cf-r2-offload-cdn' ) : __( 'Not available', 'cf-r2-offload-cdn' ),
+			'label'  => __( 'cURL Extension', 'thachpham-offload-cdn-cloudflare-r2' ),
+			'value'  => $curl_enabled ? __( 'Enabled', 'thachpham-offload-cdn-cloudflare-r2' ) : __( 'Not available', 'thachpham-offload-cdn-cloudflare-r2' ),
 			'status' => $curl_enabled ? 'ok' : 'error',
 		);
 
 		// OpenSSL extension.
 		$openssl_enabled = extension_loaded( 'openssl' );
 		$statuses[]      = array(
-			'label'  => __( 'OpenSSL Extension', 'cf-r2-offload-cdn' ),
-			'value'  => $openssl_enabled ? __( 'Enabled', 'cf-r2-offload-cdn' ) : __( 'Not available', 'cf-r2-offload-cdn' ),
+			'label'  => __( 'OpenSSL Extension', 'thachpham-offload-cdn-cloudflare-r2' ),
+			'value'  => $openssl_enabled ? __( 'Enabled', 'thachpham-offload-cdn-cloudflare-r2' ) : __( 'Not available', 'thachpham-offload-cdn-cloudflare-r2' ),
 			'status' => $openssl_enabled ? 'ok' : 'error',
 		);
 
@@ -157,7 +157,7 @@ class SystemInfoTab {
 		$memory_min    = 128 * 1024 * 1024; // 128MB.
 		$memory_status = $memory_bytes >= $memory_min ? 'ok' : 'warning';
 		$statuses[]    = array(
-			'label'  => __( 'PHP Memory Limit', 'cf-r2-offload-cdn' ),
+			'label'  => __( 'PHP Memory Limit', 'thachpham-offload-cdn-cloudflare-r2' ),
 			'value'  => $memory_limit,
 			'status' => $memory_status,
 		);
@@ -166,8 +166,8 @@ class SystemInfoTab {
 		$max_execution = ini_get( 'max_execution_time' );
 		$exec_status   = ( 0 === (int) $max_execution || (int) $max_execution >= 60 ) ? 'ok' : 'warning';
 		$statuses[]    = array(
-			'label'  => __( 'Max Execution Time', 'cf-r2-offload-cdn' ),
-			'value'  => 0 === (int) $max_execution ? __( 'Unlimited', 'cf-r2-offload-cdn' ) : $max_execution . 's',
+			'label'  => __( 'Max Execution Time', 'thachpham-offload-cdn-cloudflare-r2' ),
+			'value'  => 0 === (int) $max_execution ? __( 'Unlimited', 'thachpham-offload-cdn-cloudflare-r2' ) : $max_execution . 's',
 			'status' => $exec_status,
 		);
 
@@ -183,12 +183,12 @@ class SystemInfoTab {
 		$debug_info = self::get_debug_info( $settings );
 		?>
 		<div class="settings-section cfr2-debug-info">
-			<h3><?php esc_html_e( 'Debug Information', 'cf-r2-offload-cdn' ); ?></h3>
-			<p class="description"><?php esc_html_e( 'Copy this information when requesting support.', 'cf-r2-offload-cdn' ); ?></p>
+			<h3><?php esc_html_e( 'Debug Information', 'thachpham-offload-cdn-cloudflare-r2' ); ?></h3>
+			<p class="description"><?php esc_html_e( 'Copy this information when requesting support.', 'thachpham-offload-cdn-cloudflare-r2' ); ?></p>
 			<textarea id="cfr2-debug-textarea" class="cfr2-debug-textarea" readonly rows="20"><?php echo esc_textarea( $debug_info ); ?></textarea>
 			<p>
 				<button type="button" class="button" onclick="navigator.clipboard.writeText(document.getElementById('cfr2-debug-textarea').value); this.textContent='Copied!';">
-					<?php esc_html_e( 'Copy to Clipboard', 'cf-r2-offload-cdn' ); ?>
+					<?php esc_html_e( 'Copy to Clipboard', 'thachpham-offload-cdn-cloudflare-r2' ); ?>
 				</button>
 			</p>
 		</div>

@@ -61,6 +61,20 @@ class RestApiHelper {
 	}
 
 	/**
+	 * Check attachment endpoint permission.
+	 *
+	 * @return bool True if has permission.
+	 */
+	public static function check_attachment_permission(): bool {
+		$is_public = (bool) apply_filters( 'cfr2_rest_public_attachment_endpoint', false );
+		if ( $is_public ) {
+			return true;
+		}
+
+		return self::check_read_permission();
+	}
+
+	/**
 	 * Check write permission.
 	 *
 	 * @return bool True if has permission.
