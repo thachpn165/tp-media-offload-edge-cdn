@@ -46,7 +46,7 @@ class SettingsAjaxHandler {
 
 		if ( false !== $save_count && (int) $save_count >= RateLimit::MAX_SAVES ) {
 			wp_send_json_error(
-				array( 'message' => __( 'Too many requests. Please try again later.', 'tp-media-offload-edge-cdn' ) ),
+				array( 'message' => __( 'Too many requests. Please try again later.', 'cf-r2-offload-cdn' ) ),
 				429
 			);
 		}
@@ -59,7 +59,7 @@ class SettingsAjaxHandler {
 
 		if ( false === $nonce_valid ) {
 			wp_send_json_error(
-				array( 'message' => __( 'Security check failed.', 'tp-media-offload-edge-cdn' ) ),
+				array( 'message' => __( 'Security check failed.', 'cf-r2-offload-cdn' ) ),
 				403
 			);
 		}
@@ -67,7 +67,7 @@ class SettingsAjaxHandler {
 		// Check permissions.
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error(
-				array( 'message' => __( 'Permission denied.', 'tp-media-offload-edge-cdn' ) ),
+				array( 'message' => __( 'Permission denied.', 'cf-r2-offload-cdn' ) ),
 				403
 			);
 		}
@@ -109,18 +109,18 @@ class SettingsAjaxHandler {
 
 			if ( false !== $current && $current === $sanitized ) {
 				wp_send_json_success(
-					array( 'message' => __( 'No changes detected.', 'tp-media-offload-edge-cdn' ) )
+					array( 'message' => __( 'No changes detected.', 'cf-r2-offload-cdn' ) )
 				);
 			}
 
 			wp_send_json_error(
-				array( 'message' => __( 'Failed to save settings. Please try again.', 'tp-media-offload-edge-cdn' ) ),
+				array( 'message' => __( 'Failed to save settings. Please try again.', 'cf-r2-offload-cdn' ) ),
 				500
 			);
 		}
 
 		wp_send_json_success(
-			array( 'message' => __( 'Settings saved.', 'tp-media-offload-edge-cdn' ) )
+			array( 'message' => __( 'Settings saved.', 'cf-r2-offload-cdn' ) )
 		);
 	}
 
@@ -222,7 +222,7 @@ class SettingsAjaxHandler {
 
 		if ( false === $nonce_valid ) {
 			wp_send_json_error(
-				array( 'message' => __( 'Security check failed.', 'tp-media-offload-edge-cdn' ) ),
+				array( 'message' => __( 'Security check failed.', 'cf-r2-offload-cdn' ) ),
 				403
 			);
 		}
@@ -230,7 +230,7 @@ class SettingsAjaxHandler {
 		// Check permissions.
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error(
-				array( 'message' => __( 'Permission denied.', 'tp-media-offload-edge-cdn' ) ),
+				array( 'message' => __( 'Permission denied.', 'cf-r2-offload-cdn' ) ),
 				403
 			);
 		}
@@ -242,7 +242,7 @@ class SettingsAjaxHandler {
 
 		if ( false !== $count && (int) $count >= 5 ) {
 			wp_send_json_error(
-				array( 'message' => __( 'Too many attempts. Wait 60 seconds.', 'tp-media-offload-edge-cdn' ) ),
+				array( 'message' => __( 'Too many attempts. Wait 60 seconds.', 'cf-r2-offload-cdn' ) ),
 				429
 			);
 		}
@@ -277,7 +277,7 @@ class SettingsAjaxHandler {
 					array(
 						'message' => sprintf(
 							/* translators: %s: credential field name */
-							__( 'Missing %s', 'tp-media-offload-edge-cdn' ),
+							__( 'Missing %s', 'cf-r2-offload-cdn' ),
 							$key
 						),
 					)
@@ -291,7 +291,7 @@ class SettingsAjaxHandler {
 
 		if ( $result['success'] ) {
 			wp_send_json_success(
-				array( 'message' => __( 'Connection successful!', 'tp-media-offload-edge-cdn' ) )
+				array( 'message' => __( 'Connection successful!', 'cf-r2-offload-cdn' ) )
 			);
 		} else {
 			wp_send_json_error( array( 'message' => $result['message'] ) );
@@ -310,26 +310,26 @@ class SettingsAjaxHandler {
 
 		if ( false === $nonce_valid ) {
 			wp_send_json_error(
-				array( 'message' => __( 'Security check failed.', 'tp-media-offload-edge-cdn' ) ),
+				array( 'message' => __( 'Security check failed.', 'cf-r2-offload-cdn' ) ),
 				403
 			);
 		}
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'tp-media-offload-edge-cdn' ) ), 403 );
+			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'cf-r2-offload-cdn' ) ), 403 );
 		}
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing
 		$cdn_url = isset( $_POST['cdn_url'] ) ? esc_url_raw( wp_unslash( $_POST['cdn_url'] ) ) : '';
 
 		if ( empty( $cdn_url ) ) {
-			wp_send_json_error( array( 'message' => __( 'CDN URL is required.', 'tp-media-offload-edge-cdn' ) ) );
+			wp_send_json_error( array( 'message' => __( 'CDN URL is required.', 'cf-r2-offload-cdn' ) ) );
 		}
 
 		$settings = get_option( Settings::OPTION_KEY, array() );
 
 		if ( empty( $settings['cf_api_token'] ) || empty( $settings['r2_account_id'] ) ) {
-			wp_send_json_error( array( 'message' => __( 'Please configure Cloudflare API Token first.', 'tp-media-offload-edge-cdn' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Please configure Cloudflare API Token first.', 'cf-r2-offload-cdn' ) ) );
 		}
 
 		$encryption = EncryptionService::get_instance();
@@ -357,13 +357,13 @@ class SettingsAjaxHandler {
 
 		if ( false === $nonce_valid ) {
 			wp_send_json_error(
-				array( 'message' => __( 'Security check failed.', 'tp-media-offload-edge-cdn' ) ),
+				array( 'message' => __( 'Security check failed.', 'cf-r2-offload-cdn' ) ),
 				403
 			);
 		}
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'tp-media-offload-edge-cdn' ) ), 403 );
+			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'cf-r2-offload-cdn' ) ), 403 );
 		}
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing
@@ -371,7 +371,7 @@ class SettingsAjaxHandler {
 		$record_id = isset( $_POST['record_id'] ) ? sanitize_text_field( wp_unslash( $_POST['record_id'] ) ) : '';
 
 		if ( empty( $zone_id ) || empty( $record_id ) ) {
-			wp_send_json_error( array( 'message' => __( 'Missing zone or record ID.', 'tp-media-offload-edge-cdn' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Missing zone or record ID.', 'cf-r2-offload-cdn' ) ) );
 		}
 
 		$settings   = get_option( Settings::OPTION_KEY, array() );
@@ -382,9 +382,9 @@ class SettingsAjaxHandler {
 		$result = $api->enable_dns_proxy( $zone_id, $record_id );
 
 		if ( $result['success'] ) {
-			wp_send_json_success( array( 'message' => __( 'Proxy enabled successfully!', 'tp-media-offload-edge-cdn' ) ) );
+			wp_send_json_success( array( 'message' => __( 'Proxy enabled successfully!', 'cf-r2-offload-cdn' ) ) );
 		} else {
-			wp_send_json_error( array( 'message' => $result['errors'][0]['message'] ?? __( 'Failed to enable proxy.', 'tp-media-offload-edge-cdn' ) ) );
+			wp_send_json_error( array( 'message' => $result['errors'][0]['message'] ?? __( 'Failed to enable proxy.', 'cf-r2-offload-cdn' ) ) );
 		}
 	}
 }

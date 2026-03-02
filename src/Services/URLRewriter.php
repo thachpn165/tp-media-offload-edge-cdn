@@ -22,6 +22,13 @@ class URLRewriter implements HookableInterface {
 	private const BREAKPOINTS = array( 320, 640, 768, 1024, 1280, 1536 );
 
 	/**
+	 * Tracked attachment IDs per request to avoid duplicate counting.
+	 *
+	 * @var array<int, bool>
+	 */
+	private static array $tracked_transformations = array();
+
+	/**
 	 * Plugin settings.
 	 *
 	 * @var array
@@ -120,16 +127,17 @@ class URLRewriter implements HookableInterface {
 	 * @param int $attachment_id Attachment ID.
 	 */
 	private function track_transformation( int $attachment_id ): void {
-		$track_action = 'cfr2_tracked_' . $attachment_id;
-		if ( ! did_action( $track_action ) ) {
-			add_action(
-				'shutdown',
-				function () {
-					StatsTracker::increment();
-				}
-			);
-			do_action( $track_action );
+		if ( isset( self::$tracked_transformations[ $attachment_id ] ) ) {
+			return;
 		}
+
+		self::$tracked_transformations[ $attachment_id ] = true;
+		add_action(
+			'shutdown',
+			static function (): void {
+				StatsTracker::increment();
+			}
+		);
 	}
 
 	/**

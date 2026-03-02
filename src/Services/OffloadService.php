@@ -82,7 +82,7 @@ class OffloadService {
 			return array(
 				'success' => false,
 				/* translators: %s: MIME type */
-				'message' => sprintf( __( 'MIME type "%s" is not allowed for offload', 'tp-media-offload-edge-cdn' ), $mime ?: 'unknown' ),
+				'message' => sprintf( __( 'MIME type "%s" is not allowed for offload', 'cf-r2-offload-cdn' ), $mime ?: 'unknown' ),
 			);
 		}
 
@@ -90,7 +90,7 @@ class OffloadService {
 		if ( ! ExtensibilityHooks::should_offload( $attachment_id ) ) {
 			return array(
 				'success' => false,
-				'message' => __( 'Offload blocked by filter (cfr2_should_offload)', 'tp-media-offload-edge-cdn' ),
+				'message' => __( 'Offload blocked by filter (cfr2_should_offload)', 'cf-r2-offload-cdn' ),
 			);
 		}
 
@@ -98,7 +98,7 @@ class OffloadService {
 		if ( ! $file_path || ! file_exists( $file_path ) ) {
 			return array(
 				'success' => false,
-				'message' => __( 'File not found', 'tp-media-offload-edge-cdn' ),
+				'message' => __( 'File not found', 'cf-r2-offload-cdn' ),
 			);
 		}
 
@@ -145,7 +145,7 @@ class OffloadService {
 				'url'           => $result['url'],
 				'thumbnails'    => $thumb_results,
 				'local_deleted' => $deleted_local,
-				'message'       => __( 'Offloaded successfully', 'tp-media-offload-edge-cdn' ) . $thumb_info,
+				'message'       => __( 'Offloaded successfully', 'cf-r2-offload-cdn' ) . $thumb_info,
 			);
 
 			// Clear dashboard stats cache so stats update immediately.
@@ -332,7 +332,7 @@ class OffloadService {
 		if ( ! $this->is_offloaded( $attachment_id ) ) {
 			return array(
 				'success' => false,
-				'message' => __( 'Attachment is not offloaded to R2', 'tp-media-offload-edge-cdn' ),
+				'message' => __( 'Attachment is not offloaded to R2', 'cf-r2-offload-cdn' ),
 			);
 		}
 
@@ -345,7 +345,7 @@ class OffloadService {
 		if ( ! $file_path || ! $r2_key ) {
 			return array(
 				'success' => false,
-				'message' => __( 'Missing file path or R2 key', 'tp-media-offload-edge-cdn' ),
+				'message' => __( 'Missing file path or R2 key', 'cf-r2-offload-cdn' ),
 			);
 		}
 
@@ -360,7 +360,7 @@ class OffloadService {
 					'success' => false,
 					'message' => sprintf(
 						/* translators: %s: error message */
-						__( 'Failed to download main file: %s', 'tp-media-offload-edge-cdn' ),
+						__( 'Failed to download main file: %s', 'cf-r2-offload-cdn' ),
 						$result['message'] ?? 'Unknown error'
 					),
 				);
@@ -410,10 +410,10 @@ class OffloadService {
 		$message = $downloaded_main
 			? sprintf(
 				/* translators: %d: number of thumbnails downloaded */
-				__( 'Files restored to local (+%d thumbnails)', 'tp-media-offload-edge-cdn' ),
+				__( 'Files restored to local (+%d thumbnails)', 'cf-r2-offload-cdn' ),
 				$downloaded_thumbs
 			)
-			: __( 'Files already exist locally', 'tp-media-offload-edge-cdn' );
+			: __( 'Files already exist locally', 'cf-r2-offload-cdn' );
 
 		$result = array(
 			'success'           => true,
@@ -472,7 +472,7 @@ class OffloadService {
 		if ( ! $this->is_offloaded( $attachment_id ) ) {
 			return array(
 				'success' => false,
-				'message' => __( 'Attachment is not offloaded to R2', 'tp-media-offload-edge-cdn' ),
+				'message' => __( 'Attachment is not offloaded to R2', 'cf-r2-offload-cdn' ),
 			);
 		}
 
@@ -480,7 +480,7 @@ class OffloadService {
 		if ( ! $file_path ) {
 			return array(
 				'success' => false,
-				'message' => __( 'Could not determine file path', 'tp-media-offload-edge-cdn' ),
+				'message' => __( 'Could not determine file path', 'cf-r2-offload-cdn' ),
 			);
 		}
 
@@ -523,10 +523,10 @@ class OffloadService {
 		$message = $deleted_main
 			? sprintf(
 				/* translators: %d: number of thumbnails deleted */
-				__( 'Local files deleted (+%d thumbnails)', 'tp-media-offload-edge-cdn' ),
+				__( 'Local files deleted (+%d thumbnails)', 'cf-r2-offload-cdn' ),
 				$deleted_thumbs
 			)
-			: __( 'No local files found to delete', 'tp-media-offload-edge-cdn' );
+			: __( 'No local files found to delete', 'cf-r2-offload-cdn' );
 
 		return array(
 			'success'        => true,

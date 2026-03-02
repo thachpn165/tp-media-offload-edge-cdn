@@ -7,12 +7,12 @@
 set -e
 
 # Configuration
-PLUGIN_SLUG="tp-media-offload-edge-cdn"
 MAIN_PLUGIN_FILE="tp-media-offload-edge-cdn.php"
+PLUGIN_SLUG="$(basename "$MAIN_PLUGIN_FILE" .php)"
 PLUGIN_VERSION=$(grep -m1 "Version:" "$MAIN_PLUGIN_FILE" 2>/dev/null | sed 's/.*Version:[[:space:]]*//' | tr -d ' ' || echo "1.0.0")
 BUILD_DIR="dist"
 SVN_DIR="svn"
-ZIP_FILE="tp-media-offload-edge-cdn-${PLUGIN_VERSION}.zip"
+ZIP_FILE="${PLUGIN_SLUG}-${PLUGIN_VERSION}.zip"
 
 # Colors
 RED='\033[0;31m'

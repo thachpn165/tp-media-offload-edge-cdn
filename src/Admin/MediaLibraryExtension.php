@@ -171,13 +171,35 @@ class MediaLibraryExtension implements HookableInterface {
 	}
 
 	/**
+	 * Add nonce to notice redirect URL.
+	 *
+	 * @param string $url Redirect URL.
+	 * @return string
+	 */
+	private function with_notice_nonce( string $url ): string {
+		return wp_nonce_url( $url, 'cfr2_notice_action', 'cfr2_notice_nonce' );
+	}
+
+	/**
+	 * Add notice query arg and nonce to URL.
+	 *
+	 * @param string $url   Redirect URL.
+	 * @param string $key   Notice key.
+	 * @param int    $value Notice value.
+	 * @return string
+	 */
+	private function add_notice_query_arg( string $url, string $key, int $value = 1 ): string {
+		return $this->with_notice_nonce( add_query_arg( $key, $value, $url ) );
+	}
+
+	/**
 	 * Add R2 Status column to Media Library.
 	 *
 	 * @param array $columns Columns array.
 	 * @return array Modified columns array.
 	 */
 	public function add_status_column( array $columns ): array {
-		$columns['cfr2_status'] = __( 'R2 Status', 'tp-media-offload-edge-cdn' );
+		$columns['cfr2_status'] = __( 'R2 Status', 'cf-r2-offload-cdn' );
 		return $columns;
 	}
 
@@ -198,13 +220,13 @@ class MediaLibraryExtension implements HookableInterface {
 		$local_exists  = $file_path && file_exists( $file_path );
 
 		if ( $is_offloaded && $local_exists ) {
-			echo '<span class="cfr2-status cfr2-both">' . esc_html__( 'Local / R2', 'tp-media-offload-edge-cdn' ) . '</span>';
+			echo '<span class="cfr2-status cfr2-both">' . esc_html__( 'Local / R2', 'cf-r2-offload-cdn' ) . '</span>';
 		} elseif ( $is_offloaded ) {
-			echo '<span class="cfr2-status cfr2-offloaded">' . esc_html__( 'R2', 'tp-media-offload-edge-cdn' ) . '</span>';
+			echo '<span class="cfr2-status cfr2-offloaded">' . esc_html__( 'R2', 'cf-r2-offload-cdn' ) . '</span>';
 		} elseif ( $is_pending ) {
-			echo '<span class="cfr2-status cfr2-pending">' . esc_html__( 'Pending', 'tp-media-offload-edge-cdn' ) . '</span>';
+			echo '<span class="cfr2-status cfr2-pending">' . esc_html__( 'Pending', 'cf-r2-offload-cdn' ) . '</span>';
 		} else {
-			echo '<span class="cfr2-status cfr2-local">' . esc_html__( 'Local', 'tp-media-offload-edge-cdn' ) . '</span>';
+			echo '<span class="cfr2-status cfr2-local">' . esc_html__( 'Local', 'cf-r2-offload-cdn' ) . '</span>';
 		}
 	}
 
@@ -232,15 +254,15 @@ class MediaLibraryExtension implements HookableInterface {
 				$actions['cfr2_delete_local'] = sprintf(
 					'<a href="%s" class="cfr2-delete-local" style="color: #d63638;" onclick="return confirm(\'%s\');">%s</a>',
 					esc_url( admin_url( "admin-ajax.php?action=cfr2_delete_local_single&id={$post->ID}&nonce={$nonce}" ) ),
-					esc_js( __( 'Delete local files? This cannot be undone. Files will remain on R2.', 'tp-media-offload-edge-cdn' ) ),
-					esc_html__( 'Delete Local', 'tp-media-offload-edge-cdn' )
+					esc_js( __( 'Delete local files? This cannot be undone. Files will remain on R2.', 'cf-r2-offload-cdn' ) ),
+					esc_html__( 'Delete Local', 'cf-r2-offload-cdn' )
 				);
 			} else {
 				// R2 only: Show Restore to download from R2.
 				$actions['cfr2_restore'] = sprintf(
 					'<a href="%s" class="cfr2-restore">%s</a>',
 					esc_url( admin_url( "admin-ajax.php?action=cfr2_restore_single&id={$post->ID}&nonce={$nonce}" ) ),
-					esc_html__( 'Download to Local', 'tp-media-offload-edge-cdn' )
+					esc_html__( 'Download to Local', 'cf-r2-offload-cdn' )
 				);
 			}
 
@@ -248,14 +270,14 @@ class MediaLibraryExtension implements HookableInterface {
 			$actions['cfr2_reoffload'] = sprintf(
 				'<a href="%s" class="cfr2-reoffload">%s</a>',
 				esc_url( admin_url( "admin-ajax.php?action=cfr2_offload_single&id={$post->ID}&nonce={$nonce}&force=1" ) ),
-				esc_html__( 'Re-offload', 'tp-media-offload-edge-cdn' )
+				esc_html__( 'Re-offload', 'cf-r2-offload-cdn' )
 			);
 		} else {
 			// Not offloaded: Show Offload action.
 			$actions['cfr2_offload'] = sprintf(
 				'<a href="%s" class="cfr2-offload">%s</a>',
 				esc_url( admin_url( "admin-ajax.php?action=cfr2_offload_single&id={$post->ID}&nonce={$nonce}" ) ),
-				esc_html__( 'Offload to R2', 'tp-media-offload-edge-cdn' )
+				esc_html__( 'Offload to R2', 'cf-r2-offload-cdn' )
 			);
 		}
 
@@ -269,8 +291,8 @@ class MediaLibraryExtension implements HookableInterface {
 	 * @return array Modified bulk actions array.
 	 */
 	public function add_bulk_actions( array $actions ): array {
-		$actions['cfr2_bulk_offload'] = __( 'Offload to R2', 'tp-media-offload-edge-cdn' );
-		$actions['cfr2_bulk_restore'] = __( 'Restore to Local', 'tp-media-offload-edge-cdn' );
+		$actions['cfr2_bulk_offload'] = __( 'Offload to R2', 'cf-r2-offload-cdn' );
+		$actions['cfr2_bulk_restore'] = __( 'Restore to Local', 'cf-r2-offload-cdn' );
 		return $actions;
 	}
 
@@ -309,14 +331,17 @@ class MediaLibraryExtension implements HookableInterface {
 			\as_schedule_single_action( time(), 'cfr2_process_queue' );
 		}
 
-		return add_query_arg( 'cfr2_queued', $count, $redirect_url );
+		return $this->add_notice_query_arg( $redirect_url, 'cfr2_queued', $count );
 	}
 
 	/**
 	 * Show bulk action notices.
 	 */
 	public function show_bulk_action_notices(): void {
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		$notice_nonce = sanitize_text_field( wp_unslash( $_GET['cfr2_notice_nonce'] ?? '' ) );
+		if ( '' === $notice_nonce || ! wp_verify_nonce( $notice_nonce, 'cfr2_notice_action' ) ) {
+			return;
+		}
 
 		// Show error from transient (secure - no URL param exposure).
 		if ( isset( $_GET['cfr2_error'] ) ) {
@@ -334,7 +359,7 @@ class MediaLibraryExtension implements HookableInterface {
 				// Fallback generic message if transient expired.
 				printf(
 					'<div class="notice notice-error is-dismissible"><p>%s</p></div>',
-					esc_html__( 'An error occurred during the operation.', 'tp-media-offload-edge-cdn' )
+					esc_html__( 'An error occurred during the operation.', 'cf-r2-offload-cdn' )
 				);
 			}
 		}
@@ -343,37 +368,35 @@ class MediaLibraryExtension implements HookableInterface {
 		if ( isset( $_GET['cfr2_offloaded'] ) ) {
 			printf(
 				'<div class="notice notice-success is-dismissible"><p>%s</p></div>',
-				esc_html__( 'File offloaded to R2 successfully.', 'tp-media-offload-edge-cdn' )
+				esc_html__( 'File offloaded to R2 successfully.', 'cf-r2-offload-cdn' )
 			);
 		}
 
 		if ( isset( $_GET['cfr2_restored'] ) ) {
 			printf(
 				'<div class="notice notice-success is-dismissible"><p>%s</p></div>',
-				esc_html__( 'File downloaded to local storage. Website continues serving from R2.', 'tp-media-offload-edge-cdn' )
+				esc_html__( 'File downloaded to local storage. Website continues serving from R2.', 'cf-r2-offload-cdn' )
 			);
 		}
 
 		if ( isset( $_GET['cfr2_local_deleted'] ) ) {
 			printf(
 				'<div class="notice notice-success is-dismissible"><p>%s</p></div>',
-				esc_html__( 'Local files deleted successfully. Files remain on R2.', 'tp-media-offload-edge-cdn' )
+				esc_html__( 'Local files deleted successfully. Files remain on R2.', 'cf-r2-offload-cdn' )
 			);
 		}
 
 		if ( ! isset( $_GET['cfr2_queued'] ) ) {
-			// phpcs:enable WordPress.Security.NonceVerification.Recommended
 			return;
 		}
 
 		$count = absint( $_GET['cfr2_queued'] );
-		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 		printf(
 			'<div class="notice notice-success is-dismissible"><p>%s</p></div>',
 			sprintf(
 				/* translators: %d: number of files */
-				esc_html( _n( '%d file queued for processing.', '%d files queued for processing.', $count, 'tp-media-offload-edge-cdn' ) ),
+				esc_html( _n( '%d file queued for processing.', '%d files queued for processing.', $count, 'cf-r2-offload-cdn' ) ),
 				(int) $count
 			)
 		);
@@ -389,11 +412,11 @@ class MediaLibraryExtension implements HookableInterface {
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 		if ( ! wp_verify_nonce( $nonce, 'cfr2_media_action_' . $id ) ) {
-			wp_die( esc_html__( 'Security check failed.', 'tp-media-offload-edge-cdn' ) );
+			wp_die( esc_html__( 'Security check failed.', 'cf-r2-offload-cdn' ) );
 		}
 
 		if ( ! current_user_can( 'upload_files' ) ) {
-			wp_die( esc_html__( 'Permission denied.', 'tp-media-offload-edge-cdn' ) );
+			wp_die( esc_html__( 'Permission denied.', 'cf-r2-offload-cdn' ) );
 		}
 
 		$credentials = self::get_r2_credentials();
@@ -409,11 +432,11 @@ class MediaLibraryExtension implements HookableInterface {
 		$redirect_url = $this->get_safe_redirect_url();
 
 		if ( $result['success'] ) {
-			wp_safe_redirect( add_query_arg( 'cfr2_offloaded', 1, $redirect_url ) );
+			wp_safe_redirect( $this->add_notice_query_arg( $redirect_url, 'cfr2_offloaded' ) );
 		} else {
 			// Store error in transient instead of exposing in URL.
 			set_transient( TransientKeys::ERROR_PREFIX . get_current_user_id(), $result['message'], CacheDuration::ERROR_TTL );
-			wp_safe_redirect( add_query_arg( 'cfr2_error', 1, $redirect_url ) );
+			wp_safe_redirect( $this->add_notice_query_arg( $redirect_url, 'cfr2_error' ) );
 		}
 		exit;
 	}
@@ -428,11 +451,11 @@ class MediaLibraryExtension implements HookableInterface {
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 		if ( ! wp_verify_nonce( $nonce, 'cfr2_media_action_' . $id ) ) {
-			wp_die( esc_html__( 'Security check failed.', 'tp-media-offload-edge-cdn' ) );
+			wp_die( esc_html__( 'Security check failed.', 'cf-r2-offload-cdn' ) );
 		}
 
 		if ( ! current_user_can( 'upload_files' ) ) {
-			wp_die( esc_html__( 'Permission denied.', 'tp-media-offload-edge-cdn' ) );
+			wp_die( esc_html__( 'Permission denied.', 'cf-r2-offload-cdn' ) );
 		}
 
 		$credentials  = self::get_r2_credentials();
@@ -442,7 +465,7 @@ class MediaLibraryExtension implements HookableInterface {
 
 		$offload->restore( $id );
 
-		wp_safe_redirect( add_query_arg( 'cfr2_restored', 1, $redirect_url ) );
+		wp_safe_redirect( $this->add_notice_query_arg( $redirect_url, 'cfr2_restored' ) );
 		exit;
 	}
 
@@ -456,11 +479,11 @@ class MediaLibraryExtension implements HookableInterface {
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 		if ( ! wp_verify_nonce( $nonce, 'cfr2_media_action_' . $id ) ) {
-			wp_die( esc_html__( 'Security check failed.', 'tp-media-offload-edge-cdn' ) );
+			wp_die( esc_html__( 'Security check failed.', 'cf-r2-offload-cdn' ) );
 		}
 
 		if ( ! current_user_can( 'upload_files' ) ) {
-			wp_die( esc_html__( 'Permission denied.', 'tp-media-offload-edge-cdn' ) );
+			wp_die( esc_html__( 'Permission denied.', 'cf-r2-offload-cdn' ) );
 		}
 
 		$credentials  = self::get_r2_credentials();
@@ -471,10 +494,10 @@ class MediaLibraryExtension implements HookableInterface {
 		$result = $offload->delete_local_files( $id );
 
 		if ( $result['success'] ) {
-			wp_safe_redirect( add_query_arg( 'cfr2_local_deleted', 1, $redirect_url ) );
+			wp_safe_redirect( $this->add_notice_query_arg( $redirect_url, 'cfr2_local_deleted' ) );
 		} else {
 			set_transient( TransientKeys::ERROR_PREFIX . get_current_user_id(), $result['message'], CacheDuration::ERROR_TTL );
-			wp_safe_redirect( add_query_arg( 'cfr2_error', 1, $redirect_url ) );
+			wp_safe_redirect( $this->add_notice_query_arg( $redirect_url, 'cfr2_error' ) );
 		}
 		exit;
 	}
@@ -502,9 +525,9 @@ class MediaLibraryExtension implements HookableInterface {
 			$status_html = '<span style="color: #2271b1; font-weight: bold;">';
 			$status_html .= '<span class="dashicons dashicons-admin-site" style="vertical-align: middle;"></span>';
 			$status_html .= '<span class="dashicons dashicons-cloud" style="vertical-align: middle;"></span> ';
-			$status_html .= esc_html__( 'Local / R2', 'tp-media-offload-edge-cdn' );
+			$status_html .= esc_html__( 'Local / R2', 'cf-r2-offload-cdn' );
 			if ( $thumb_count > 0 ) {
-				$status_html .= sprintf( ' (+%d %s)', $thumb_count, _n( 'thumbnail', 'thumbnails', $thumb_count, 'tp-media-offload-edge-cdn' ) );
+				$status_html .= sprintf( ' (+%d %s)', $thumb_count, _n( 'thumbnail', 'thumbnails', $thumb_count, 'cf-r2-offload-cdn' ) );
 			}
 			$status_html .= '</span>';
 			if ( $r2_url ) {
@@ -516,25 +539,25 @@ class MediaLibraryExtension implements HookableInterface {
 
 			$status_html = '<span style="color: #46b450; font-weight: bold;">';
 			$status_html .= '<span class="dashicons dashicons-cloud" style="vertical-align: middle;"></span> ';
-			$status_html .= esc_html__( 'R2', 'tp-media-offload-edge-cdn' );
+			$status_html .= esc_html__( 'R2', 'cf-r2-offload-cdn' );
 			if ( $thumb_count > 0 ) {
-				$status_html .= sprintf( ' (+%d %s)', $thumb_count, _n( 'thumbnail', 'thumbnails', $thumb_count, 'tp-media-offload-edge-cdn' ) );
+				$status_html .= sprintf( ' (+%d %s)', $thumb_count, _n( 'thumbnail', 'thumbnails', $thumb_count, 'cf-r2-offload-cdn' ) );
 			}
 			$status_html .= '</span>';
-			$status_html .= '<br><small style="color: #999;">' . esc_html__( 'No local file', 'tp-media-offload-edge-cdn' ) . '</small>';
+			$status_html .= '<br><small style="color: #999;">' . esc_html__( 'No local file', 'cf-r2-offload-cdn' ) . '</small>';
 			if ( $r2_url ) {
 				$status_html .= '<br><small style="color: #666;">' . esc_html( $r2_url ) . '</small>';
 			}
 		} elseif ( $is_pending ) {
 			$status_html = '<span style="color: #f0ad4e; font-weight: bold;">';
 			$status_html .= '<span class="dashicons dashicons-clock" style="vertical-align: middle;"></span> ';
-			$status_html .= esc_html__( 'Queued for offload', 'tp-media-offload-edge-cdn' );
+			$status_html .= esc_html__( 'Queued for offload', 'cf-r2-offload-cdn' );
 			$status_html .= '</span>';
 		} else {
 			// Local only.
 			$status_html = '<span style="color: #999;">';
 			$status_html .= '<span class="dashicons dashicons-admin-site" style="vertical-align: middle;"></span> ';
-			$status_html .= esc_html__( 'Local', 'tp-media-offload-edge-cdn' );
+			$status_html .= esc_html__( 'Local', 'cf-r2-offload-cdn' );
 			$status_html .= '</span>';
 
 			// Add offload button.
@@ -544,13 +567,13 @@ class MediaLibraryExtension implements HookableInterface {
 				'<button type="button" class="button cfr2-offload-btn" data-id="%d" data-nonce="%s">%s</button>',
 				$post->ID,
 				$nonce,
-				esc_html__( 'Offload to R2', 'tp-media-offload-edge-cdn' )
+				esc_html__( 'Offload to R2', 'cf-r2-offload-cdn' )
 			);
 			$status_html .= '<span class="cfr2-offload-status" style="margin-left: 10px;"></span>';
 		}
 
 		$form_fields['cfr2_status'] = array(
-			'label' => __( 'R2 Status', 'tp-media-offload-edge-cdn' ),
+			'label' => __( 'R2 Status', 'cf-r2-offload-cdn' ),
 			'input' => 'html',
 			'html'  => $status_html,
 		);
@@ -568,11 +591,11 @@ class MediaLibraryExtension implements HookableInterface {
 		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
 		if ( ! wp_verify_nonce( $nonce, 'cfr2_offload_attachment_' . $id ) ) {
-			wp_send_json_error( array( 'message' => __( 'Security check failed.', 'tp-media-offload-edge-cdn' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Security check failed.', 'cf-r2-offload-cdn' ) ) );
 		}
 
 		if ( ! current_user_can( 'upload_files' ) ) {
-			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'tp-media-offload-edge-cdn' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'cf-r2-offload-cdn' ) ) );
 		}
 
 		$credentials = self::get_r2_credentials();
@@ -583,12 +606,12 @@ class MediaLibraryExtension implements HookableInterface {
 		if ( $result['success'] ) {
 			wp_send_json_success(
 				array(
-					'message' => __( 'Offloaded successfully!', 'tp-media-offload-edge-cdn' ),
+					'message' => __( 'Offloaded successfully!', 'cf-r2-offload-cdn' ),
 					'url'     => $result['url'] ?? '',
 				)
 			);
 		} else {
-			wp_send_json_error( array( 'message' => $result['message'] ?? __( 'Offload failed.', 'tp-media-offload-edge-cdn' ) ) );
+			wp_send_json_error( array( 'message' => $result['message'] ?? __( 'Offload failed.', 'cf-r2-offload-cdn' ) ) );
 		}
 	}
 

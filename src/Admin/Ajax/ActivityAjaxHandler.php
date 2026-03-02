@@ -48,7 +48,7 @@ class ActivityAjaxHandler {
 
 		if ( false === $nonce_valid ) {
 			wp_send_json_error(
-				array( 'message' => __( 'Security check failed.', 'tp-media-offload-edge-cdn' ) ),
+				array( 'message' => __( 'Security check failed.', 'cf-r2-offload-cdn' ) ),
 				403
 			);
 			return false;
@@ -64,7 +64,7 @@ class ActivityAjaxHandler {
 	 */
 	private function check_permissions(): bool {
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'tp-media-offload-edge-cdn' ) ), 403 );
+			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'cf-r2-offload-cdn' ) ), 403 );
 			return false;
 		}
 		return true;
@@ -149,7 +149,7 @@ class ActivityAjaxHandler {
 			array(
 				'message' => sprintf(
 					/* translators: %d: number of items */
-					__( '%d items queued for retry.', 'tp-media-offload-edge-cdn' ),
+					__( '%d items queued for retry.', 'cf-r2-offload-cdn' ),
 					$queued
 				),
 				'queued'  => (int) $queued,
@@ -169,7 +169,7 @@ class ActivityAjaxHandler {
 		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
 		if ( ! $attachment_id ) {
-			wp_send_json_error( array( 'message' => __( 'Invalid attachment ID.', 'tp-media-offload-edge-cdn' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Invalid attachment ID.', 'cf-r2-offload-cdn' ) ) );
 		}
 
 		global $wpdb;
@@ -189,9 +189,9 @@ class ActivityAjaxHandler {
 		);
 
 		if ( $updated ) {
-			wp_send_json_success( array( 'message' => __( 'Item queued for retry.', 'tp-media-offload-edge-cdn' ) ) );
+			wp_send_json_success( array( 'message' => __( 'Item queued for retry.', 'cf-r2-offload-cdn' ) ) );
 		} else {
-			wp_send_json_error( array( 'message' => __( 'Failed to queue item.', 'tp-media-offload-edge-cdn' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Failed to queue item.', 'cf-r2-offload-cdn' ) ) );
 		}
 	}
 
@@ -204,6 +204,6 @@ class ActivityAjaxHandler {
 
 		BulkOperationLogger::clear();
 
-		wp_send_json_success( array( 'message' => __( 'Activity log cleared.', 'tp-media-offload-edge-cdn' ) ) );
+		wp_send_json_success( array( 'message' => __( 'Activity log cleared.', 'cf-r2-offload-cdn' ) ) );
 	}
 }

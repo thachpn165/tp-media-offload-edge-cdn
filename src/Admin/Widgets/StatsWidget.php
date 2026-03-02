@@ -46,13 +46,13 @@ class StatsWidget {
 			<div class="cfr2-stats-summary">
 				<div class="cfr2-stat-item cfr2-stat-single">
 					<span class="cfr2-stat-value"><?php echo esc_html( number_format( $total_requests ) ); ?></span>
-					<span class="cfr2-stat-label"><?php esc_html_e( 'Requests This Month', 'tp-media-offload-edge-cdn' ); ?></span>
+					<span class="cfr2-stat-label"><?php esc_html_e( 'Requests This Month', 'cf-r2-offload-cdn' ); ?></span>
 				</div>
 			</div>
 
 			<?php if ( ! $is_deployed ) : ?>
 				<div class="cfr2-stats-notice">
-					<p><?php esc_html_e( 'Deploy the Worker to see analytics.', 'tp-media-offload-edge-cdn' ); ?></p>
+					<p><?php esc_html_e( 'Deploy the Worker to see analytics.', 'cf-r2-offload-cdn' ); ?></p>
 				</div>
 			<?php endif; ?>
 
@@ -63,7 +63,7 @@ class StatsWidget {
 						echo wp_kses_post(
 							sprintf(
 								/* translators: %s: Cloudflare dashboard URL */
-								__( 'View detailed analytics in your <a href="%s" target="_blank" rel="noopener">Cloudflare Dashboard</a>', 'tp-media-offload-edge-cdn' ),
+								__( 'View detailed analytics in your <a href="%s" target="_blank" rel="noopener">Cloudflare Dashboard</a>', 'cf-r2-offload-cdn' ),
 								esc_url( "https://dash.cloudflare.com/{$account_id}/workers/overview" )
 							)
 						);

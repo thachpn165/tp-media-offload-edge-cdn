@@ -27,7 +27,7 @@ class AdminMenu implements HookableInterface {
 	/**
 	 * Admin menu slug.
 	 */
-	private const MENU_SLUG = 'tp-media-offload-edge-cdn';
+	private const MENU_SLUG = 'cf-r2-offload-cdn';
 
 	/**
 	 * Inline menu icon style handle.
@@ -92,8 +92,8 @@ class AdminMenu implements HookableInterface {
 	 */
 	public function add_menu_page(): void {
 		add_menu_page(
-			__( 'TP Media Offload & Edge CDN Settings', 'tp-media-offload-edge-cdn' ),
-			__( 'TP Media Offload & Edge CDN', 'tp-media-offload-edge-cdn' ),
+			__( 'TP Media Offload & Edge CDN Settings', 'cf-r2-offload-cdn' ),
+			__( 'TP Media Offload & Edge CDN', 'cf-r2-offload-cdn' ),
 			'manage_options',
 			self::MENU_SLUG,
 			array( SettingsPage::class, 'render' ),

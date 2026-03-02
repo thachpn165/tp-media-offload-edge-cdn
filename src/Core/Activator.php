@@ -24,7 +24,7 @@ class Activator {
 		if ( version_compare( PHP_VERSION, '7.4', '<' ) ) {
 			deactivate_plugins( \CFR2_BASENAME );
 			wp_die(
-				esc_html__( 'This plugin requires PHP 7.4 or higher.', 'tp-media-offload-edge-cdn' ),
+				esc_html__( 'This plugin requires PHP 7.4 or higher.', 'cf-r2-offload-cdn' ),
 				'Plugin Activation Error',
 				array( 'back_link' => true )
 			);
@@ -34,7 +34,7 @@ class Activator {
 		if ( version_compare( get_bloginfo( 'version' ), '6.0', '<' ) ) {
 			deactivate_plugins( \CFR2_BASENAME );
 			wp_die(
-				esc_html__( 'This plugin requires WordPress 6.0 or higher.', 'tp-media-offload-edge-cdn' ),
+				esc_html__( 'This plugin requires WordPress 6.0 or higher.', 'cf-r2-offload-cdn' ),
 				'Plugin Activation Error',
 				array( 'back_link' => true )
 			);

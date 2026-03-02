@@ -43,45 +43,40 @@ class DeactivationHandler implements HookableInterface {
 			'cleanupNonce'   => wp_create_nonce( 'cfr2_cleanup_nonce' ),
 			'confirmMessage' => __(
 				"Do you want to delete all plugin data?\n\n- Click OK to delete all settings, database tables, and media metadata\n- Click Cancel to keep data (you can reinstall later)\n\nNote: Files on R2 storage will not be deleted.",
-				'tp-media-offload-edge-cdn'
+				'cf-r2-offload-cdn'
 			),
 		);
 
-		$script = sprintf(
-			<<<'JS'
-jQuery(function($) {
-	const config = %s;
-	const pluginRow = $('tr[data-plugin="' + config.pluginFile + '"]');
-	const deactivateLink = pluginRow.find('.deactivate a');
-	const originalHref = deactivateLink.attr('href');
-
-	if (!deactivateLink.length || !originalHref) {
-		return;
-	}
-
-	deactivateLink.on('click', function(event) {
-		event.preventDefault();
-
-		if (!window.confirm(config.confirmMessage)) {
-			window.location.href = originalHref;
-			return;
-		}
-
-		$.ajax({
-			url: config.ajaxUrl,
-			type: 'POST',
-			data: {
-				action: 'cfr2_cleanup_data',
-				nonce: config.cleanupNonce
-			}
-		}).always(function() {
-			window.location.href = originalHref;
-		});
-	});
-});
-JS,
-			wp_json_encode( $config, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT )
-		);
+		$script  = "jQuery(function($) {\n";
+		$script .= "\tconst config = " . wp_json_encode( $config, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT ) . ";\n";
+		$script .= "\tconst pluginRow = $('tr[data-plugin=\"' + config.pluginFile + '\"]');\n";
+		$script .= "\tconst deactivateLink = pluginRow.find('.deactivate a');\n";
+		$script .= "\tconst originalHref = deactivateLink.attr('href');\n";
+		$script .= "\n";
+		$script .= "\tif (!deactivateLink.length || !originalHref) {\n";
+		$script .= "\t\treturn;\n";
+		$script .= "\t}\n";
+		$script .= "\n";
+		$script .= "\tdeactivateLink.on('click', function(event) {\n";
+		$script .= "\t\tevent.preventDefault();\n";
+		$script .= "\n";
+		$script .= "\t\tif (!window.confirm(config.confirmMessage)) {\n";
+		$script .= "\t\t\twindow.location.href = originalHref;\n";
+		$script .= "\t\t\treturn;\n";
+		$script .= "\t\t}\n";
+		$script .= "\n";
+		$script .= "\t\t$.ajax({\n";
+		$script .= "\t\t\turl: config.ajaxUrl,\n";
+		$script .= "\t\t\ttype: 'POST',\n";
+		$script .= "\t\t\tdata: {\n";
+		$script .= "\t\t\t\taction: 'cfr2_cleanup_data',\n";
+		$script .= "\t\t\t\tnonce: config.cleanupNonce\n";
+		$script .= "\t\t\t}\n";
+		$script .= "\t\t}).always(function() {\n";
+		$script .= "\t\t\twindow.location.href = originalHref;\n";
+		$script .= "\t\t});\n";
+		$script .= "\t});\n";
+		$script .= "});";
 
 		wp_enqueue_script( 'jquery' );
 		wp_add_inline_script( 'jquery', $script, 'after' );
@@ -95,7 +90,7 @@ JS,
 
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error(
-				array( 'message' => __( 'Permission denied.', 'tp-media-offload-edge-cdn' ) ),
+				array( 'message' => __( 'Permission denied.', 'cf-r2-offload-cdn' ) ),
 				403
 			);
 		}
@@ -141,7 +136,7 @@ JS,
 		wp_clear_scheduled_hook( 'cfr2_process_queue' );
 
 		wp_send_json_success(
-			array( 'message' => __( 'Data cleaned.', 'tp-media-offload-edge-cdn' ) )
+			array( 'message' => __( 'Data cleaned.', 'cf-r2-offload-cdn' ) )
 		);
 	}
 }

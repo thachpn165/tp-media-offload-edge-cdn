@@ -14,14 +14,14 @@ defined( 'WP_UNINSTALL_PLUGIN' ) || exit;
 global $wpdb;
 
 // 1. Securely wipe sensitive data before deletion.
-$settings = get_option( 'cloudflare_r2_offload_cdn_settings', array() );
-if ( ! empty( $settings['r2_secret_access_key'] ) ) {
-	$settings['r2_secret_access_key'] = str_repeat( '0', strlen( $settings['r2_secret_access_key'] ) );
+$cfr2_settings = get_option( 'cloudflare_r2_offload_cdn_settings', array() );
+if ( ! empty( $cfr2_settings['r2_secret_access_key'] ) ) {
+	$cfr2_settings['r2_secret_access_key'] = str_repeat( '0', strlen( $cfr2_settings['r2_secret_access_key'] ) );
 }
-if ( ! empty( $settings['api_key'] ) ) {
-	$settings['api_key'] = str_repeat( '0', strlen( $settings['api_key'] ) );
+if ( ! empty( $cfr2_settings['api_key'] ) ) {
+	$cfr2_settings['api_key'] = str_repeat( '0', strlen( $cfr2_settings['api_key'] ) );
 }
-update_option( 'cloudflare_r2_offload_cdn_settings', $settings );
+update_option( 'cloudflare_r2_offload_cdn_settings', $cfr2_settings );
 
 // 2. Remove plugin options.
 delete_option( 'cloudflare_r2_offload_cdn_settings' );
