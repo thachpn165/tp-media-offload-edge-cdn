@@ -19,29 +19,25 @@ use ThachPN165\CFR2OffLoad\Constants\NonceActions;
 trait AjaxSecurityTrait {
 
 	/**
-	 * Verify nonce with fallback to legacy.
+	 * Verify nonce.
 	 *
-	 * @param string $legacy_action Legacy nonce action.
-	 * @param string $new_action    New nonce action.
-	 * @param string $param_name    Nonce parameter name.
-	 * @return bool True if verified, sends error and exits otherwise.
+	 * @param string $action     Nonce action.
+	 * @param string $param_name Nonce parameter name.
+	 * @return bool True if verified, sends error otherwise.
 	 */
 	protected function verify_ajax_nonce(
-		string $legacy_action = NonceActions::LEGACY,
-		string $new_action = NonceActions::BULK,
+		string $action = NonceActions::BULK,
 		string $param_name = 'nonce'
 	): bool {
-		$is_valid = check_ajax_referer( $legacy_action, $param_name, false )
-			|| check_ajax_referer( $new_action, 'cfr2_nonce', false );
-
-		if ( ! $is_valid ) {
+		if ( ! check_ajax_referer( $action, $param_name, false ) ) {
 			wp_send_json_error(
-				array( 'message' => __( 'Security check failed.', 'cf-r2-offload-cdn' ) ),
+				array( 'message' => __( 'Security check failed.', 'tp-media-offload-edge-cdn' ) ),
 				403
 			);
+			return false;
 		}
 
-		return $is_valid;
+		return true;
 	}
 
 	/**
@@ -52,7 +48,7 @@ trait AjaxSecurityTrait {
 	protected function verify_manage_options(): bool {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error(
-				array( 'message' => __( 'Permission denied.', 'cf-r2-offload-cdn' ) ),
+				array( 'message' => __( 'Permission denied.', 'tp-media-offload-edge-cdn' ) ),
 				403
 			);
 			return false;

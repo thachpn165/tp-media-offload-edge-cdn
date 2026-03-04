@@ -105,7 +105,7 @@ class R2Client {
 			);
 			return array(
 				'success' => true,
-				'message' => __( 'Connection successful', 'cf-r2-offload-cdn' ),
+				'message' => __( 'Connection successful', 'tp-media-offload-edge-cdn' ),
 			);
 		} catch ( AwsException $e ) {
 			return array(
@@ -126,7 +126,7 @@ class R2Client {
 		if ( ! file_exists( $local_path ) ) {
 			return array(
 				'success' => false,
-				'message' => __( 'Local file not found', 'cf-r2-offload-cdn' ),
+				'message' => __( 'Local file not found', 'tp-media-offload-edge-cdn' ),
 			);
 		}
 
@@ -136,7 +136,7 @@ class R2Client {
 		if ( $file_size > 70 * 1024 * 1024 ) {
 			return array(
 				'success' => false,
-				'message' => __( 'File exceeds 70MB limit', 'cf-r2-offload-cdn' ),
+				'message' => __( 'File exceeds 70MB limit', 'tp-media-offload-edge-cdn' ),
 			);
 		}
 

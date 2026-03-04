@@ -60,9 +60,30 @@ Offload WordPress media to Cloudflare R2 storage and serve via CDN with automati
 * Conditional asset loading
 * Background queue processing
 
+= Build and Generated Assets =
+
+This plugin includes compiled frontend assets in:
+
+* `assets/js/admin.js` and `assets/js/public.js`
+* `assets/css/admin.css` and `assets/css/public.css`
+
+Source files are included in the same plugin package:
+
+* JavaScript source: `assets/src/js/admin.js`, `assets/src/js/public.js`
+* SCSS source: `assets/src/scss/admin.scss`, `assets/src/scss/public.scss`
+
+Build steps used to generate compiled files:
+
+1. `npm install`
+2. `npm run build`
+
+Development watch mode:
+
+* `npm run dev`
+
 == Installation ==
 
-1. Upload the plugin files to `/wp-content/plugins/cf-r2-offload-cdn` or install through WordPress plugins screen
+1. Upload the plugin files to `/wp-content/plugins/tp-media-offload-edge-cdn` or install through WordPress plugins screen
 2. Activate the plugin through the 'Plugins' screen in WordPress
 3. Go to **TP Media Offload & Edge CDN** in the admin menu
 
@@ -236,7 +257,7 @@ Your data stays between your WordPress site and your Cloudflare account.
 == Support ==
 
 For support, feature requests, or bug reports:
-* Visit [WordPress support forum](https://wordpress.org/support/plugin/cf-r2-offload-cdn/)
+* Visit [WordPress support forum](https://wordpress.org/support/plugin/tp-media-offload-edge-cdn/)
 * Create an issue on GitHub (coming soon)
 
 == Credits ==

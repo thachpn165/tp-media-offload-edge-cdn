@@ -26,7 +26,7 @@ class SettingsPage {
 	 */
 	public static function render(): void {
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'You do not have permission to access this page.', 'cf-r2-offload-cdn' ) );
+			wp_die( esc_html__( 'You do not have permission to access this page.', 'tp-media-offload-edge-cdn' ) );
 		}
 
 		// Add frame-busting headers to prevent clickjacking.
@@ -35,7 +35,7 @@ class SettingsPage {
 			header( 'Content-Security-Policy: frame-ancestors \'self\'' );
 		}
 
-		$settings = get_option( 'cloudflare_r2_offload_cdn_settings', array() );
+		$settings = get_option( 'cfr2_settings', array() );
 		$tabs     = self::get_tabs();
 		?>
 		<div class="wrap cloudflare-r2-offload-cdn-settings-wrap">
@@ -60,27 +60,27 @@ class SettingsPage {
 	private static function get_tabs(): array {
 		return array(
 			'dashboard'    => array(
-				'label' => __( 'Dashboard', 'cf-r2-offload-cdn' ),
+				'label' => __( 'Dashboard', 'tp-media-offload-edge-cdn' ),
 				'icon'  => 'dashicons-dashboard',
 			),
 			'storage'      => array(
-				'label' => __( 'Storage', 'cf-r2-offload-cdn' ),
+				'label' => __( 'Storage', 'tp-media-offload-edge-cdn' ),
 				'icon'  => 'dashicons-cloud-saved',
 			),
 			'cdn'          => array(
-				'label' => __( 'CDN', 'cf-r2-offload-cdn' ),
+				'label' => __( 'CDN', 'tp-media-offload-edge-cdn' ),
 				'icon'  => 'dashicons-performance',
 			),
 			'offload'      => array(
-				'label' => __( 'Offload', 'cf-r2-offload-cdn' ),
+				'label' => __( 'Offload', 'tp-media-offload-edge-cdn' ),
 				'icon'  => 'dashicons-upload',
 			),
 			'bulk-actions' => array(
-				'label' => __( 'Bulk Actions', 'cf-r2-offload-cdn' ),
+				'label' => __( 'Bulk Actions', 'tp-media-offload-edge-cdn' ),
 				'icon'  => 'dashicons-update',
 			),
 			'system-info'  => array(
-				'label' => __( 'System Info', 'cf-r2-offload-cdn' ),
+				'label' => __( 'System Info', 'tp-media-offload-edge-cdn' ),
 				'icon'  => 'dashicons-info',
 			),
 		);
@@ -110,13 +110,13 @@ class SettingsPage {
 			</ul>
 
 			<div class="cfr2-sidebar-footer">
-				<a href="https://wordpress.org/support/plugin/cf-r2-offload-cdn/" target="_blank" rel="noopener" class="button cfr2-support-btn">
+				<a href="https://wordpress.org/support/plugin/tp-media-offload-edge-cdn/" target="_blank" rel="noopener" class="button cfr2-support-btn">
 					<span class="dashicons dashicons-sos"></span>
-					<?php esc_html_e( 'Get Support', 'cf-r2-offload-cdn' ); ?>
+					<?php esc_html_e( 'Get Support', 'tp-media-offload-edge-cdn' ); ?>
 				</a>
 				<div class="cfr2-plugin-info">
 					<span class="cfr2-version">v<?php echo esc_html( \CFR2_VERSION ); ?></span>
-					<span class="cfr2-author"><?php esc_html_e( 'by', 'cf-r2-offload-cdn' ); ?> <a href="https://profiles.wordpress.org/thachpn165/" target="_blank" rel="noopener">TP</a></span>
+					<span class="cfr2-author"><?php esc_html_e( 'by', 'tp-media-offload-edge-cdn' ); ?> <a href="https://profiles.wordpress.org/thachpn165/" target="_blank" rel="noopener">TP</a></span>
 				</div>
 			</div>
 		</div>
@@ -134,7 +134,7 @@ class SettingsPage {
 			<?php DashboardTab::render(); ?>
 
 			<form id="cloudflare-r2-offload-cdn-settings-form">
-				<?php wp_nonce_field( 'cloudflare_r2_offload_cdn_save_settings', 'cloudflare_r2_offload_cdn_nonce' ); ?>
+				<?php wp_nonce_field( 'cfr2_settings_nonce', 'cfr2_nonce' ); ?>
 
 				<?php StorageTab::render( $settings ); ?>
 				<?php CdnTab::render( $settings ); ?>
@@ -144,7 +144,7 @@ class SettingsPage {
 
 				<div class="cloudflare-r2-offload-cdn-form-actions">
 					<button type="submit" class="button button-primary cloudflare-r2-offload-cdn-save-btn">
-						<span class="cloudflare-r2-offload-cdn-save-text"><?php esc_html_e( 'Save Settings', 'cf-r2-offload-cdn' ); ?></span>
+						<span class="cloudflare-r2-offload-cdn-save-text"><?php esc_html_e( 'Save Settings', 'tp-media-offload-edge-cdn' ); ?></span>
 						<span class="cloudflare-r2-offload-cdn-save-loading spinner"></span>
 					</button>
 				</div>
@@ -152,8 +152,8 @@ class SettingsPage {
 
 			<div class="cloudflare-r2-offload-cdn-disclaimer" style="margin-top: 30px; padding: 15px; background: #f9f9f9; border-left: 4px solid #ccc; color: #666; font-size: 12px;">
 				<p style="margin: 0;">
-					<strong><?php esc_html_e( 'Disclaimer:', 'cf-r2-offload-cdn' ); ?></strong>
-					<?php esc_html_e( 'This plugin is an independent, third-party project and is not affiliated with, endorsed by, or officially associated with Cloudflare, Inc. "Cloudflare" and "R2" are trademarks of Cloudflare, Inc. The use of these names is solely for descriptive purposes to indicate compatibility with Cloudflare services.', 'cf-r2-offload-cdn' ); ?>
+					<strong><?php esc_html_e( 'Disclaimer:', 'tp-media-offload-edge-cdn' ); ?></strong>
+					<?php esc_html_e( 'This plugin is an independent, third-party project and is not affiliated with, endorsed by, or officially associated with Cloudflare, Inc. "Cloudflare" and "R2" are trademarks of Cloudflare, Inc. The use of these names is solely for descriptive purposes to indicate compatibility with Cloudflare services.', 'tp-media-offload-edge-cdn' ); ?>
 				</p>
 			</div>
 		</div>

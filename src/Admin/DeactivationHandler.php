@@ -43,7 +43,7 @@ class DeactivationHandler implements HookableInterface {
 			'cleanupNonce'   => wp_create_nonce( 'cfr2_cleanup_nonce' ),
 			'confirmMessage' => __(
 				"Do you want to delete all plugin data?\n\n- Click OK to delete all settings, database tables, and media metadata\n- Click Cancel to keep data (you can reinstall later)\n\nNote: Files on R2 storage will not be deleted.",
-				'cf-r2-offload-cdn'
+				'tp-media-offload-edge-cdn'
 			),
 		);
 
@@ -76,7 +76,7 @@ class DeactivationHandler implements HookableInterface {
 		$script .= "\t\t\twindow.location.href = originalHref;\n";
 		$script .= "\t\t});\n";
 		$script .= "\t});\n";
-		$script .= "});";
+		$script .= '});';
 
 		wp_enqueue_script( 'jquery' );
 		wp_add_inline_script( 'jquery', $script, 'after' );
@@ -90,7 +90,7 @@ class DeactivationHandler implements HookableInterface {
 
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error(
-				array( 'message' => __( 'Permission denied.', 'cf-r2-offload-cdn' ) ),
+				array( 'message' => __( 'Permission denied.', 'tp-media-offload-edge-cdn' ) ),
 				403
 			);
 		}
@@ -98,7 +98,7 @@ class DeactivationHandler implements HookableInterface {
 		global $wpdb;
 
 		// 1. Securely wipe sensitive data.
-		$settings = get_option( 'cloudflare_r2_offload_cdn_settings', array() );
+		$settings = get_option( 'cfr2_settings', array() );
 		if ( ! empty( $settings['r2_secret_access_key'] ) ) {
 			$settings['r2_secret_access_key'] = str_repeat( '0', strlen( $settings['r2_secret_access_key'] ) );
 		}
@@ -107,7 +107,7 @@ class DeactivationHandler implements HookableInterface {
 		}
 
 		// 2. Remove plugin options.
-		delete_option( 'cloudflare_r2_offload_cdn_settings' );
+		delete_option( 'cfr2_settings' );
 		delete_option( 'cfr2_db_version' );
 
 		// 3. Drop custom database tables.
@@ -136,7 +136,7 @@ class DeactivationHandler implements HookableInterface {
 		wp_clear_scheduled_hook( 'cfr2_process_queue' );
 
 		wp_send_json_success(
-			array( 'message' => __( 'Data cleaned.', 'cf-r2-offload-cdn' ) )
+			array( 'message' => __( 'Data cleaned.', 'tp-media-offload-edge-cdn' ) )
 		);
 	}
 }

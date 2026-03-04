@@ -70,6 +70,11 @@ class BulkOperationAjaxHandlerTest extends TestCase {
 			}
 
 			public function prepare( $query, ...$args ) {
+				foreach ( $args as $arg ) {
+					$replacement = is_numeric( $arg ) ? (string) (int) $arg : "'" . addslashes( (string) $arg ) . "'";
+					$query       = preg_replace( '/%[ds]/', $replacement, $query, 1 );
+				}
+
 				return $query;
 			}
 
@@ -79,14 +84,19 @@ class BulkOperationAjaxHandlerTest extends TestCase {
 				}
 
 				if ( false !== strpos( $query, 'SELECT attachment_id FROM' ) ) {
-					preg_match( '/IN \(([^)]+)\)/', $query, $matches );
-					$ids = array();
-					if ( ! empty( $matches[1] ) ) {
-						foreach ( explode( ',', $matches[1] ) as $id ) {
-							$ids[] = (int) trim( $id );
-						}
+					if ( preg_match( '/BETWEEN\s+(\d+)\s+AND\s+(\d+)/', $query, $matches ) ) {
+						$min = (int) $matches[1];
+						$max = (int) $matches[2];
+
+						return array_values(
+							array_filter(
+								$this->pending_ids,
+								static fn( int $id ): bool => $id >= $min && $id <= $max
+							)
+						);
 					}
-					return array_values( array_intersect( $this->pending_ids, $ids ) );
+
+					return array();
 				}
 
 				return array();

@@ -238,7 +238,7 @@ class CloudflareAPI {
 		if ( empty( $parsed['host'] ) ) {
 			return array(
 				'success' => false,
-				'message' => __( 'Invalid CDN URL', 'cf-r2-offload-cdn' ),
+				'message' => __( 'Invalid CDN URL', 'tp-media-offload-edge-cdn' ),
 			);
 		}
 
@@ -255,7 +255,7 @@ class CloudflareAPI {
 				'success' => false,
 				'message' => sprintf(
 					/* translators: %s: domain name */
-					__( 'Domain "%s" not found in your Cloudflare account', 'cf-r2-offload-cdn' ),
+					__( 'Domain "%s" not found in your Cloudflare account', 'tp-media-offload-edge-cdn' ),
 					$base_domain
 				),
 			);
@@ -273,7 +273,7 @@ class CloudflareAPI {
 		if ( $record ) {
 			// Record exists - check configuration.
 			if ( empty( $record['proxied'] ) ) {
-				$warnings[] = __( 'DNS record exists but Cloudflare proxy is DISABLED. Worker will NOT work without proxy.', 'cf-r2-offload-cdn' );
+				$warnings[] = __( 'DNS record exists but Cloudflare proxy is DISABLED. Worker will NOT work without proxy.', 'tp-media-offload-edge-cdn' );
 			}
 
 			return array(
@@ -305,7 +305,7 @@ class CloudflareAPI {
 				'record'  => $create_result['result'],
 				'message' => sprintf(
 					/* translators: %s: CDN hostname */
-					__( 'DNS record created for %s with Cloudflare proxy enabled.', 'cf-r2-offload-cdn' ),
+					__( 'DNS record created for %s with Cloudflare proxy enabled.', 'tp-media-offload-edge-cdn' ),
 					$cdn_host
 				),
 				'zone_id' => $zone_id,
@@ -314,7 +314,7 @@ class CloudflareAPI {
 
 		return array(
 			'success' => false,
-			'message' => $create_result['errors'][0]['message'] ?? __( 'Failed to create DNS record', 'cf-r2-offload-cdn' ),
+			'message' => $create_result['errors'][0]['message'] ?? __( 'Failed to create DNS record', 'tp-media-offload-edge-cdn' ),
 		);
 	}
 

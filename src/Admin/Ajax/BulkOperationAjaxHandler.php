@@ -208,13 +208,13 @@ class BulkOperationAjaxHandler {
 	private function get_cancel_message( string $action ): string {
 		switch ( $action ) {
 			case QueueAction::OFFLOAD:
-				return __( 'Bulk offload cancelled.', 'cf-r2-offload-cdn' );
+				return __( 'Bulk offload cancelled.', 'tp-media-offload-edge-cdn' );
 			case QueueAction::RESTORE:
-				return __( 'Bulk restore cancelled.', 'cf-r2-offload-cdn' );
+				return __( 'Bulk restore cancelled.', 'tp-media-offload-edge-cdn' );
 			case QueueAction::DELETE_LOCAL:
-				return __( 'Bulk delete cancelled.', 'cf-r2-offload-cdn' );
+				return __( 'Bulk delete cancelled.', 'tp-media-offload-edge-cdn' );
 			default:
-				return __( 'Operation cancelled.', 'cf-r2-offload-cdn' );
+				return __( 'Operation cancelled.', 'tp-media-offload-edge-cdn' );
 		}
 	}
 
@@ -227,13 +227,13 @@ class BulkOperationAjaxHandler {
 	private function get_done_message( string $action ): string {
 		switch ( $action ) {
 			case QueueAction::OFFLOAD:
-				return __( 'All items processed.', 'cf-r2-offload-cdn' );
+				return __( 'All items processed.', 'tp-media-offload-edge-cdn' );
 			case QueueAction::RESTORE:
-				return __( 'All items restored.', 'cf-r2-offload-cdn' );
+				return __( 'All items restored.', 'tp-media-offload-edge-cdn' );
 			case QueueAction::DELETE_LOCAL:
-				return __( 'All local files deleted.', 'cf-r2-offload-cdn' );
+				return __( 'All local files deleted.', 'tp-media-offload-edge-cdn' );
 			default:
-				return __( 'Operation completed.', 'cf-r2-offload-cdn' );
+				return __( 'Operation completed.', 'tp-media-offload-edge-cdn' );
 		}
 	}
 
@@ -257,7 +257,7 @@ class BulkOperationAjaxHandler {
 			array( '%s' )
 		);
 
-		wp_send_json_success( array( 'message' => __( 'Bulk offload cancelled.', 'cf-r2-offload-cdn' ) ) );
+		wp_send_json_success( array( 'message' => __( 'Bulk offload cancelled.', 'tp-media-offload-edge-cdn' ) ) );
 	}
 
 	/**
@@ -307,7 +307,7 @@ class BulkOperationAjaxHandler {
 		$item_id = isset( $_POST['item_id'] ) ? absint( $_POST['item_id'] ) : 0;
 
 		if ( ! $item_id ) {
-			wp_send_json_error( array( 'message' => __( 'Invalid item ID.', 'cf-r2-offload-cdn' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Invalid item ID.', 'tp-media-offload-edge-cdn' ) ) );
 		}
 
 		global $wpdb;
@@ -329,9 +329,9 @@ class BulkOperationAjaxHandler {
 			// Clear stats cache.
 			delete_transient( TransientKeys::DASHBOARD_STATS );
 
-			wp_send_json_success( array( 'message' => __( 'Item cancelled.', 'cf-r2-offload-cdn' ) ) );
+			wp_send_json_success( array( 'message' => __( 'Item cancelled.', 'tp-media-offload-edge-cdn' ) ) );
 		} else {
-			wp_send_json_error( array( 'message' => __( 'Could not cancel item. It may already be processing.', 'cf-r2-offload-cdn' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Could not cancel item. It may already be processing.', 'tp-media-offload-edge-cdn' ) ) );
 		}
 	}
 
@@ -364,7 +364,7 @@ class BulkOperationAjaxHandler {
 			array(
 				'message'   => sprintf(
 					/* translators: %d: number of items cancelled */
-					__( '%d pending items cancelled.', 'cf-r2-offload-cdn' ),
+					__( '%d pending items cancelled.', 'tp-media-offload-edge-cdn' ),
 					$updated ? $updated : 0
 				),
 				'cancelled' => $updated ? $updated : 0,
@@ -409,8 +409,8 @@ class BulkOperationAjaxHandler {
 				break;
 			}
 
-			$queued  += $this->enqueue_items( $attachments, QueueAction::OFFLOAD, true );
-			$last_id  = (int) end( $attachments );
+			$queued += $this->enqueue_items( $attachments, QueueAction::OFFLOAD, true );
+			$last_id = (int) end( $attachments );
 
 			if ( count( $attachments ) < self::OFFLOAD_QUERY_BATCH_SIZE ) {
 				break;
@@ -429,8 +429,8 @@ class BulkOperationAjaxHandler {
 	 * @return int Number of items queued.
 	 */
 	private function enqueue_items( array $attachments, string $action, bool $check_exists = false ): int {
-		$queued        = 0;
-		$existing_ids  = $check_exists ? $this->get_pending_attachment_lookup( $attachments ) : array();
+		$queued       = 0;
+		$existing_ids = $check_exists ? $this->get_pending_attachment_lookup( $attachments ) : array();
 
 		foreach ( $attachments as $attachment_id ) {
 			$attachment_id = (int) $attachment_id;
@@ -461,22 +461,27 @@ class BulkOperationAjaxHandler {
 			return array();
 		}
 
-		$ids_sql = implode( ',', $attachment_ids );
+		$min_id        = (int) min( $attachment_ids );
+		$max_id        = (int) max( $attachment_ids );
+		$requested_ids = array_fill_keys( $attachment_ids, true );
 
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- IDs are sanitized with absint.
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$existing_ids = $wpdb->get_col(
+		$candidate_ids = $wpdb->get_col(
 			$wpdb->prepare(
 				"SELECT attachment_id FROM {$wpdb->prefix}cfr2_offload_queue
-				 WHERE status = %s AND attachment_id IN ({$ids_sql})",
-				QueueStatus::PENDING
+				 WHERE status = %s AND attachment_id BETWEEN %d AND %d",
+				QueueStatus::PENDING,
+				$min_id,
+				$max_id
 			)
 		);
-		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		$lookup = array();
-		foreach ( $existing_ids as $attachment_id ) {
-			$lookup[ (int) $attachment_id ] = true;
+		foreach ( $candidate_ids as $attachment_id ) {
+			$attachment_id = (int) $attachment_id;
+			if ( isset( $requested_ids[ $attachment_id ] ) ) {
+				$lookup[ $attachment_id ] = true;
+			}
 		}
 
 		return $lookup;
@@ -493,7 +498,7 @@ class BulkOperationAjaxHandler {
 			array(
 				'message' => sprintf(
 					/* translators: %1$d: number of files, %2$s: action */
-					__( '%1$d files queued for %2$s.', 'cf-r2-offload-cdn' ),
+					__( '%1$d files queued for %2$s.', 'tp-media-offload-edge-cdn' ),
 					$queued,
 					$action
 				),

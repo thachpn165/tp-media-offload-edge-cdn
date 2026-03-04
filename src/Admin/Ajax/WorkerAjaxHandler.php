@@ -37,15 +37,9 @@ class WorkerAjaxHandler {
 	 * @return bool True if valid, sends error response otherwise.
 	 */
 	private function verify_worker_nonce(): bool {
-		// Support both legacy and new nonces during transition.
-		$nonce_valid = check_ajax_referer( NonceActions::LEGACY, 'nonce', false );
-		if ( false === $nonce_valid ) {
-			$nonce_valid = check_ajax_referer( NonceActions::WORKER, 'cfr2_nonce', false );
-		}
-
-		if ( false === $nonce_valid ) {
+		if ( ! check_ajax_referer( NonceActions::WORKER, 'nonce', false ) ) {
 			wp_send_json_error(
-				array( 'message' => __( 'Security check failed.', 'cf-r2-offload-cdn' ) ),
+				array( 'message' => __( 'Security check failed.', 'tp-media-offload-edge-cdn' ) ),
 				403
 			);
 			return false;
@@ -61,7 +55,7 @@ class WorkerAjaxHandler {
 	 */
 	private function check_permissions(): bool {
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'cf-r2-offload-cdn' ) ), 403 );
+			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'tp-media-offload-edge-cdn' ) ), 403 );
 			return false;
 		}
 		return true;
@@ -71,21 +65,22 @@ class WorkerAjaxHandler {
 	 * AJAX handler for deploy worker.
 	 */
 	public function ajax_deploy_worker(): void {
-		$this->verify_worker_nonce();
-		$this->check_permissions();
+		if ( ! $this->verify_worker_nonce() || ! $this->check_permissions() ) {
+			return;
+		}
 
 		$settings = get_option( Settings::OPTION_KEY, array() );
 
 		// Validate required fields.
 		if ( empty( $settings['cf_api_token'] ) || empty( $settings['r2_account_id'] ) ) {
-			wp_send_json_error( array( 'message' => __( 'Missing Cloudflare API Token or Account ID.', 'cf-r2-offload-cdn' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Missing Cloudflare API Token or Account ID.', 'tp-media-offload-edge-cdn' ) ) );
 		}
 
 		// Validate R2 bucket is configured.
 		if ( empty( $settings['r2_bucket'] ) ) {
 			wp_send_json_error(
 				array(
-					'message' => __( 'R2 Bucket name is required. Please configure it in the Storage tab first.', 'cf-r2-offload-cdn' ),
+					'message' => __( 'R2 Bucket name is required. Please configure it in the Storage tab first.', 'tp-media-offload-edge-cdn' ),
 				)
 			);
 		}
@@ -116,7 +111,7 @@ class WorkerAjaxHandler {
 
 			wp_send_json_success(
 				array(
-					'message'  => __( 'Worker deployed successfully!', 'cf-r2-offload-cdn' ),
+					'message'  => __( 'Worker deployed successfully!', 'tp-media-offload-edge-cdn' ),
 					'steps'    => $result['steps'],
 					'warnings' => $result['warnings'] ?? array(),
 				)
@@ -136,8 +131,9 @@ class WorkerAjaxHandler {
 	 * AJAX handler for remove worker.
 	 */
 	public function ajax_remove_worker(): void {
-		$this->verify_worker_nonce();
-		$this->check_permissions();
+		if ( ! $this->verify_worker_nonce() || ! $this->check_permissions() ) {
+			return;
+		}
 
 		$settings = get_option( Settings::OPTION_KEY, array() );
 
@@ -154,7 +150,7 @@ class WorkerAjaxHandler {
 			unset( $settings['worker_name'], $settings['worker_deployed_at'] );
 			update_option( Settings::OPTION_KEY, $settings );
 
-			wp_send_json_success( array( 'message' => __( 'Worker removed.', 'cf-r2-offload-cdn' ) ) );
+			wp_send_json_success( array( 'message' => __( 'Worker removed.', 'tp-media-offload-edge-cdn' ) ) );
 		} else {
 			wp_send_json_error( array( 'message' => $result['errors'][0]['message'] ?? 'Unknown error' ) );
 		}
@@ -164,8 +160,9 @@ class WorkerAjaxHandler {
 	 * AJAX handler for worker status.
 	 */
 	public function ajax_worker_status(): void {
-		$this->verify_worker_nonce();
-		$this->check_permissions();
+		if ( ! $this->verify_worker_nonce() || ! $this->check_permissions() ) {
+			return;
+		}
 
 		$settings = get_option( Settings::OPTION_KEY, array() );
 

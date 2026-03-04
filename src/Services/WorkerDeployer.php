@@ -52,7 +52,7 @@ class WorkerDeployer {
 		if ( ! $verify['success'] ) {
 			return array(
 				'success' => false,
-				'message' => __( 'Invalid API token', 'cf-r2-offload-cdn' ),
+				'message' => __( 'Invalid API token', 'tp-media-offload-edge-cdn' ),
 				'steps'   => $steps,
 			);
 		}
@@ -79,7 +79,7 @@ class WorkerDeployer {
 				'success' => false,
 				'message' => sprintf(
 					/* translators: %s: error message */
-					__( 'Failed to upload Worker script: %s', 'cf-r2-offload-cdn' ),
+					__( 'Failed to upload Worker script: %s', 'tp-media-offload-edge-cdn' ),
 					$error_msg
 				),
 				'steps'   => $steps,
@@ -124,7 +124,7 @@ class WorkerDeployer {
 
 		return array(
 			'success'     => true,
-			'message'     => __( 'Worker deployed successfully', 'cf-r2-offload-cdn' ),
+			'message'     => __( 'Worker deployed successfully', 'tp-media-offload-edge-cdn' ),
 			'worker_name' => $this->worker_name,
 			'steps'       => $steps,
 			'warnings'    => $warnings,
@@ -211,7 +211,7 @@ class WorkerDeployer {
 				'success' => false,
 				'message' => sprintf(
 					/* translators: %s: domain name */
-					__( 'Zone not found for domain: %s', 'cf-r2-offload-cdn' ),
+					__( 'Zone not found for domain: %s', 'tp-media-offload-edge-cdn' ),
 					$base_domain
 				),
 			);
@@ -231,7 +231,7 @@ class WorkerDeployer {
 
 		return array(
 			'success' => false,
-			'message' => $result['errors'][0]['message'] ?? __( 'Failed to configure route', 'cf-r2-offload-cdn' ),
+			'message' => $result['errors'][0]['message'] ?? __( 'Failed to configure route', 'tp-media-offload-edge-cdn' ),
 		);
 	}
 }

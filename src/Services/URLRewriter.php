@@ -46,7 +46,7 @@ class URLRewriter implements HookableInterface {
 	 * Constructor.
 	 */
 	public function __construct() {
-		$this->settings      = get_option( 'cloudflare_r2_offload_cdn_settings', array() );
+		$this->settings      = get_option( 'cfr2_settings', array() );
 		$this->cdn_available = $this->check_cdn_availability();
 	}
 

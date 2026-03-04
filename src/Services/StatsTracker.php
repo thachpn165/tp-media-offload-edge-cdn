@@ -22,10 +22,10 @@ class StatsTracker {
 	/**
 	 * Get full stats table name.
 	 *
-	 * @param \wpdb $wpdb WordPress database object.
+	 * @param object $wpdb WordPress database object.
 	 * @return string
 	 */
-	private static function get_table_name( \wpdb $wpdb ): string {
+	private static function get_table_name( $wpdb ): string {
 		return $wpdb->prefix . self::TABLE_SUFFIX;
 	}
 
@@ -107,7 +107,7 @@ class StatsTracker {
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery
 
-		return $results ?: array();
+		return $results ? $results : array();
 	}
 
 	/**

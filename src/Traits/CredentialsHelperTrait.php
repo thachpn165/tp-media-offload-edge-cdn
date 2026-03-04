@@ -24,7 +24,7 @@ trait CredentialsHelperTrait {
 	 */
 	protected static function get_r2_credentials( ?array $settings = null ): array {
 		if ( null === $settings ) {
-			$settings = get_option( 'cloudflare_r2_offload_cdn_settings', array() );
+			$settings = get_option( 'cfr2_settings', array() );
 		}
 
 		$encryption = EncryptionService::get_instance();
@@ -45,7 +45,7 @@ trait CredentialsHelperTrait {
 	 */
 	protected static function get_cf_api_token( ?array $settings = null ): string {
 		if ( null === $settings ) {
-			$settings = get_option( 'cloudflare_r2_offload_cdn_settings', array() );
+			$settings = get_option( 'cfr2_settings', array() );
 		}
 
 		$encryption = EncryptionService::get_instance();

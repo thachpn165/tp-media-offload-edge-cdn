@@ -31,7 +31,7 @@ class URLRewriterTest extends TestCase {
 
 		// Set up test settings.
 		update_option(
-			'cloudflare_r2_offload_cdn_settings',
+			'cfr2_settings',
 			array(
 				'cdn_enabled' => true,
 				'cdn_url'     => 'https://cdn.example.com',
@@ -46,7 +46,7 @@ class URLRewriterTest extends TestCase {
 	 * Cleanup after tests.
 	 */
 	public function tearDown(): void {
-		delete_option( 'cloudflare_r2_offload_cdn_settings' );
+		delete_option( 'cfr2_settings' );
 		parent::tearDown();
 	}
 
@@ -99,7 +99,7 @@ class URLRewriterTest extends TestCase {
 	 */
 	public function test_get_sizes_attribute_generates_smart_sizes_when_enabled(): void {
 		update_option(
-			'cloudflare_r2_offload_cdn_settings',
+			'cfr2_settings',
 			array(
 				'cdn_enabled'       => true,
 				'cdn_url'           => 'https://cdn.example.com',
@@ -131,7 +131,7 @@ class URLRewriterTest extends TestCase {
 	 */
 	public function test_rewrite_attachment_url_uses_r2_public_domain_without_cdn(): void {
 		update_option(
-			'cloudflare_r2_offload_cdn_settings',
+			'cfr2_settings',
 			array(
 				'cdn_enabled'      => 0,
 				'r2_public_domain' => 'https://pub.r2.dev',
@@ -151,7 +151,7 @@ class URLRewriterTest extends TestCase {
 	 */
 	public function test_rewrite_attachment_url_uses_cdn_transform_when_enabled(): void {
 		update_option(
-			'cloudflare_r2_offload_cdn_settings',
+			'cfr2_settings',
 			array(
 				'cdn_enabled' => 1,
 				'cdn_url'     => 'https://cdn.example.com',

@@ -21,10 +21,9 @@ class Activator {
 	 */
 	public static function activate(): void {
 		// Check PHP version.
-		if ( version_compare( PHP_VERSION, '7.4', '<' ) ) {
-			deactivate_plugins( \CFR2_BASENAME );
+		if ( version_compare( PHP_VERSION, '8.0', '<' ) ) {
 			wp_die(
-				esc_html__( 'This plugin requires PHP 7.4 or higher.', 'cf-r2-offload-cdn' ),
+				esc_html__( 'This plugin requires PHP 8.0 or higher.', 'tp-media-offload-edge-cdn' ),
 				'Plugin Activation Error',
 				array( 'back_link' => true )
 			);
@@ -32,9 +31,8 @@ class Activator {
 
 		// Check WP version.
 		if ( version_compare( get_bloginfo( 'version' ), '6.0', '<' ) ) {
-			deactivate_plugins( \CFR2_BASENAME );
 			wp_die(
-				esc_html__( 'This plugin requires WordPress 6.0 or higher.', 'cf-r2-offload-cdn' ),
+				esc_html__( 'This plugin requires WordPress 6.0 or higher.', 'tp-media-offload-edge-cdn' ),
 				'Plugin Activation Error',
 				array( 'back_link' => true )
 			);
@@ -49,9 +47,9 @@ class Activator {
 		}
 
 		// Create default options.
-		if ( false === get_option( 'cloudflare_r2_offload_cdn_settings' ) ) {
+		if ( false === get_option( 'cfr2_settings' ) ) {
 			add_option(
-				'cloudflare_r2_offload_cdn_settings',
+				'cfr2_settings',
 				array(
 					'enable_feature' => 0,
 					'api_key'        => '',

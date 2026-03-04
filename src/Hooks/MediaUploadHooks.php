@@ -30,7 +30,7 @@ class MediaUploadHooks implements HookableInterface {
 	 */
 	public function register_hooks(): void {
 		// Only register auto-offload hook if enabled (avoid overhead when disabled).
-		$settings = get_option( 'cloudflare_r2_offload_cdn_settings', array() );
+		$settings = get_option( 'cfr2_settings', array() );
 		if ( ! empty( $settings['auto_offload'] ) ) {
 			// Use wp_generate_attachment_metadata filter instead of add_attachment action
 			// This ensures thumbnails are already generated before offloading.
@@ -61,7 +61,7 @@ class MediaUploadHooks implements HookableInterface {
 	 */
 	private function process_auto_offload( int $attachment_id ): void {
 		// Get settings (auto_offload already checked in register_hooks).
-		$settings = get_option( 'cloudflare_r2_offload_cdn_settings', array() );
+		$settings = get_option( 'cfr2_settings', array() );
 
 		// Validate R2 configured.
 		if ( empty( $settings['r2_account_id'] ) || empty( $settings['r2_bucket'] ) ) {
@@ -111,7 +111,7 @@ class MediaUploadHooks implements HookableInterface {
 			return; // Not offloaded, nothing to do.
 		}
 
-		$settings = get_option( 'cloudflare_r2_offload_cdn_settings', array() );
+		$settings = get_option( 'cfr2_settings', array() );
 
 		// If sync_delete is enabled, delete from R2.
 		if ( ! empty( $settings['sync_delete'] ) ) {
@@ -164,7 +164,7 @@ class MediaUploadHooks implements HookableInterface {
 			'success',
 			sprintf(
 				/* translators: %d: number of files deleted from R2 */
-				__( 'Deleted %d file(s) from R2', 'cf-r2-offload-cdn' ),
+				__( 'Deleted %d file(s) from R2', 'tp-media-offload-edge-cdn' ),
 				$deleted_count
 			)
 		);

@@ -66,7 +66,7 @@ A production-ready WordPress plugin for offloading media to Cloudflare R2 with a
 ```bash
 ./scripts/build.sh clean       # Clean build directories
 ./scripts/build.sh build       # Build to dist/
-./scripts/build.sh zip         # Create ZIP archive (tp-media-offload-edge-cdn-VERSION.zip)
+./scripts/build.sh zip         # Create ZIP archive (tp-media-offload-edge-cdn.zip)
 ./scripts/build.sh deploy-svn  # Deploy to SVN structure
 ./scripts/build.sh version X.X # Bump version
 ```

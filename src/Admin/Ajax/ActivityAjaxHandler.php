@@ -40,15 +40,9 @@ class ActivityAjaxHandler {
 	 * @return bool True if valid, sends error response otherwise.
 	 */
 	private function verify_activity_nonce(): bool {
-		// Support both legacy and new nonces during transition.
-		$nonce_valid = check_ajax_referer( NonceActions::LEGACY, 'nonce', false );
-		if ( false === $nonce_valid ) {
-			$nonce_valid = check_ajax_referer( NonceActions::ACTIVITY, 'cfr2_nonce', false );
-		}
-
-		if ( false === $nonce_valid ) {
+		if ( ! check_ajax_referer( NonceActions::ACTIVITY, 'nonce', false ) ) {
 			wp_send_json_error(
-				array( 'message' => __( 'Security check failed.', 'cf-r2-offload-cdn' ) ),
+				array( 'message' => __( 'Security check failed.', 'tp-media-offload-edge-cdn' ) ),
 				403
 			);
 			return false;
@@ -64,7 +58,7 @@ class ActivityAjaxHandler {
 	 */
 	private function check_permissions(): bool {
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'cf-r2-offload-cdn' ) ), 403 );
+			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'tp-media-offload-edge-cdn' ) ), 403 );
 			return false;
 		}
 		return true;
@@ -74,8 +68,9 @@ class ActivityAjaxHandler {
 	 * AJAX handler for get stats.
 	 */
 	public function ajax_get_stats(): void {
-		$this->verify_activity_nonce();
-		$this->check_permissions();
+		if ( ! $this->verify_activity_nonce() || ! $this->check_permissions() ) {
+			return;
+		}
 
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		$period = sanitize_text_field( wp_unslash( $_GET['period'] ?? 'month' ) );
@@ -108,8 +103,9 @@ class ActivityAjaxHandler {
 	 * AJAX handler for get activity log.
 	 */
 	public function ajax_get_activity_log(): void {
-		$this->verify_activity_nonce();
-		$this->check_permissions();
+		if ( ! $this->verify_activity_nonce() || ! $this->check_permissions() ) {
+			return;
+		}
 
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		$limit = isset( $_GET['limit'] ) ? absint( $_GET['limit'] ) : 20;
@@ -124,8 +120,9 @@ class ActivityAjaxHandler {
 	 * AJAX handler for retry all failed.
 	 */
 	public function ajax_retry_failed(): void {
-		$this->verify_activity_nonce();
-		$this->check_permissions();
+		if ( ! $this->verify_activity_nonce() || ! $this->check_permissions() ) {
+			return;
+		}
 
 		global $wpdb;
 
@@ -149,7 +146,7 @@ class ActivityAjaxHandler {
 			array(
 				'message' => sprintf(
 					/* translators: %d: number of items */
-					__( '%d items queued for retry.', 'cf-r2-offload-cdn' ),
+					__( '%d items queued for retry.', 'tp-media-offload-edge-cdn' ),
 					$queued
 				),
 				'queued'  => (int) $queued,
@@ -161,15 +158,16 @@ class ActivityAjaxHandler {
 	 * AJAX handler for retry single.
 	 */
 	public function ajax_retry_single(): void {
-		$this->verify_activity_nonce();
-		$this->check_permissions();
+		if ( ! $this->verify_activity_nonce() || ! $this->check_permissions() ) {
+			return;
+		}
 
 		// phpcs:disable WordPress.Security.NonceVerification.Missing
 		$attachment_id = isset( $_POST['attachment_id'] ) ? absint( $_POST['attachment_id'] ) : 0;
 		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
 		if ( ! $attachment_id ) {
-			wp_send_json_error( array( 'message' => __( 'Invalid attachment ID.', 'cf-r2-offload-cdn' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Invalid attachment ID.', 'tp-media-offload-edge-cdn' ) ) );
 		}
 
 		global $wpdb;
@@ -189,9 +187,9 @@ class ActivityAjaxHandler {
 		);
 
 		if ( $updated ) {
-			wp_send_json_success( array( 'message' => __( 'Item queued for retry.', 'cf-r2-offload-cdn' ) ) );
+			wp_send_json_success( array( 'message' => __( 'Item queued for retry.', 'tp-media-offload-edge-cdn' ) ) );
 		} else {
-			wp_send_json_error( array( 'message' => __( 'Failed to queue item.', 'cf-r2-offload-cdn' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Failed to queue item.', 'tp-media-offload-edge-cdn' ) ) );
 		}
 	}
 
@@ -199,11 +197,12 @@ class ActivityAjaxHandler {
 	 * AJAX handler for clear log.
 	 */
 	public function ajax_clear_log(): void {
-		$this->verify_activity_nonce();
-		$this->check_permissions();
+		if ( ! $this->verify_activity_nonce() || ! $this->check_permissions() ) {
+			return;
+		}
 
 		BulkOperationLogger::clear();
 
-		wp_send_json_success( array( 'message' => __( 'Activity log cleared.', 'cf-r2-offload-cdn' ) ) );
+		wp_send_json_success( array( 'message' => __( 'Activity log cleared.', 'tp-media-offload-edge-cdn' ) ) );
 	}
 }

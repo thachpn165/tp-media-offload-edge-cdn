@@ -35,7 +35,7 @@ class QueueProcessor {
 		global $wpdb;
 
 		// Get batch size from settings.
-		$settings   = get_option( 'cloudflare_r2_offload_cdn_settings', array() );
+		$settings   = get_option( 'cfr2_settings', array() );
 		$batch_size = min( (int) ( $settings['batch_size'] ?? self::BATCH_SIZE ), self::MAX_BATCH_SIZE );
 
 		// Check if cancelled.
@@ -86,7 +86,7 @@ class QueueProcessor {
 				'delete_local' => $offload->delete_local_files( $item->attachment_id ),
 				default        => array(
 					'success' => false,
-					'message' => __( 'Unknown action', 'cf-r2-offload-cdn' ),
+					'message' => __( 'Unknown action', 'tp-media-offload-edge-cdn' ),
 				),
 			};
 
@@ -108,7 +108,7 @@ class QueueProcessor {
 			BulkOperationLogger::log(
 				$item->attachment_id,
 				$result['success'] ? 'success' : 'error',
-				$result['message'] ?? ( $result['success'] ? __( 'Offloaded successfully', 'cf-r2-offload-cdn' ) : __( 'Operation failed', 'cf-r2-offload-cdn' ) )
+				$result['message'] ?? ( $result['success'] ? __( 'Offloaded successfully', 'tp-media-offload-edge-cdn' ) : __( 'Operation failed', 'tp-media-offload-edge-cdn' ) )
 			);
 
 			// Check for cancellation between items.
@@ -140,7 +140,7 @@ class QueueProcessor {
 		if ( ! $r2_key ) {
 			return array(
 				'success' => false,
-				'message' => __( 'No R2 key found', 'cf-r2-offload-cdn' ),
+				'message' => __( 'No R2 key found', 'tp-media-offload-edge-cdn' ),
 			);
 		}
 		return $r2->delete_file( $r2_key );

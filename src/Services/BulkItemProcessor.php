@@ -55,7 +55,7 @@ class BulkItemProcessor {
 				$item->id,
 				$attachment_id,
 				$filename,
-				__( 'R2 credentials not configured.', 'cf-r2-offload-cdn' )
+				__( 'R2 credentials not configured.', 'tp-media-offload-edge-cdn' )
 			);
 		}
 
@@ -146,12 +146,12 @@ class BulkItemProcessor {
 	 */
 	private function format_response_message( array $result, string $action ): string {
 		if ( ! $result['success'] ) {
-			return $result['message'] ?? __( 'Unknown error', 'cf-r2-offload-cdn' );
+			return $result['message'] ?? __( 'Unknown error', 'tp-media-offload-edge-cdn' );
 		}
 
 		switch ( $action ) {
 			case QueueAction::OFFLOAD:
-				$message = __( 'Offloaded to R2', 'cf-r2-offload-cdn' );
+				$message = __( 'Offloaded to R2', 'tp-media-offload-edge-cdn' );
 				if ( ! empty( $result['thumbnails']['total'] ) ) {
 					$message .= sprintf(
 						' (+%d/%d thumbnails)',
@@ -162,20 +162,20 @@ class BulkItemProcessor {
 				return $message;
 
 			case QueueAction::RESTORE:
-				return __( 'Restored to local', 'cf-r2-offload-cdn' );
+				return __( 'Restored to local', 'tp-media-offload-edge-cdn' );
 
 			case QueueAction::DELETE_LOCAL:
 				if ( ! empty( $result['deleted_main'] ) ) {
 					return sprintf(
 						/* translators: %d: number of deleted thumbnail files */
-						__( 'Deleted local files (+%d thumbnails)', 'cf-r2-offload-cdn' ),
+						__( 'Deleted local files (+%d thumbnails)', 'tp-media-offload-edge-cdn' ),
 						$result['deleted_thumbs'] ?? 0
 					);
 				}
-				return __( 'No local files to delete', 'cf-r2-offload-cdn' );
+				return __( 'No local files to delete', 'tp-media-offload-edge-cdn' );
 
 			default:
-				return $result['message'] ?? __( 'Completed', 'cf-r2-offload-cdn' );
+				return $result['message'] ?? __( 'Completed', 'tp-media-offload-edge-cdn' );
 		}
 	}
 }

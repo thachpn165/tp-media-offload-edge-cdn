@@ -130,9 +130,9 @@ import '../scss/admin.scss';
       const formData = this.$form.serialize();
 
       $.ajax({
-        url: myPluginAdmin.ajaxUrl,
+        url: cfr2Admin.ajaxUrl,
         type: 'POST',
-        data: formData + '&action=cloudflare_r2_offload_cdn_save_settings',
+        data: formData + '&action=cfr2_save_settings',
         success: this.handleSaveSuccess.bind(this),
         error: this.handleSaveError.bind(this),
         complete: () => this.setLoading(false),
@@ -148,7 +148,7 @@ import '../scss/admin.scss';
       if (response.success) {
         this.showToast(response.data.message, 'success');
       } else {
-        this.showToast(response.data.message || myPluginAdmin.strings.error, 'error');
+        this.showToast(response.data.message || cfr2Admin.strings.error, 'error');
       }
     },
 
@@ -156,7 +156,7 @@ import '../scss/admin.scss';
      * Handle save error.
      */
     handleSaveError() {
-      this.showToast(myPluginAdmin.strings.error, 'error');
+      this.showToast(cfr2Admin.strings.error, 'error');
     },
 
     /**
@@ -209,11 +209,11 @@ import '../scss/admin.scss';
       $result.html('<span class="spinner is-active" style="float:none;margin:0 5px;"></span>');
 
       $.ajax({
-        url: myPluginAdmin.ajaxUrl,
+        url: cfr2Admin.ajaxUrl,
         type: 'POST',
         data: {
-          action: 'cloudflare_r2_offload_cdn_test_r2',
-          cloudflare_r2_offload_cdn_nonce: $('#cloudflare_r2_offload_cdn_nonce').val(),
+          action: 'cfr2_test_r2',
+          cfr2_nonce: $('#cfr2_nonce').val(),
           r2_account_id: $('#r2_account_id').val(),
           r2_access_key_id: $('#r2_access_key_id').val(),
           r2_secret_access_key: $('#r2_secret_access_key').val(),
@@ -254,11 +254,11 @@ import '../scss/admin.scss';
       $btn.prop('disabled', true).text('Queuing...');
 
       $.ajax({
-        url: myPluginAdmin.ajaxUrl,
+        url: cfr2Admin.ajaxUrl,
         type: 'POST',
         data: {
           action: 'cfr2_bulk_offload_all',
-          nonce: $('#cloudflare_r2_offload_cdn_nonce').val(),
+          nonce: $('#cfr2_nonce').val(),
         },
         success: (response) => {
           if (response.success) {
@@ -295,11 +295,11 @@ import '../scss/admin.scss';
       $btn.prop('disabled', true).text('Queuing...');
 
       $.ajax({
-        url: myPluginAdmin.ajaxUrl,
+        url: cfr2Admin.ajaxUrl,
         type: 'POST',
         data: {
           action: 'cfr2_bulk_restore_all',
-          nonce: $('#cloudflare_r2_offload_cdn_nonce').val(),
+          nonce: $('#cfr2_nonce').val(),
         },
         success: (response) => {
           if (response.success) {
@@ -337,11 +337,11 @@ import '../scss/admin.scss';
       $btn.prop('disabled', true).text('Queuing...');
 
       $.ajax({
-        url: myPluginAdmin.ajaxUrl,
+        url: cfr2Admin.ajaxUrl,
         type: 'POST',
         data: {
           action: 'cfr2_bulk_delete_local',
-          nonce: $('#cloudflare_r2_offload_cdn_nonce').val(),
+          nonce: $('#cfr2_nonce').val(),
         },
         success: (response) => {
           if (response.success) {
@@ -376,11 +376,11 @@ import '../scss/admin.scss';
       }
 
       $.ajax({
-        url: myPluginAdmin.ajaxUrl,
+        url: cfr2Admin.ajaxUrl,
         type: 'POST',
         data: {
           action: 'cfr2_cancel_bulk',
-          nonce: $('#cloudflare_r2_offload_cdn_nonce').val(),
+          nonce: $('#cfr2_nonce').val(),
         },
         success: (response) => {
           if (response.success) {
@@ -454,11 +454,11 @@ import '../scss/admin.scss';
      */
     refreshButtonCounts() {
       $.ajax({
-        url: myPluginAdmin.ajaxUrl,
+        url: cfr2Admin.ajaxUrl,
         type: 'POST',
         data: {
           action: 'cfr2_get_bulk_counts',
-          nonce: $('#cloudflare_r2_offload_cdn_nonce').val(),
+          nonce: $('#cfr2_nonce').val(),
         },
         success: (response) => {
           if (response.success) {
@@ -510,11 +510,11 @@ import '../scss/admin.scss';
       const actionText = actionTexts[this.currentAction] || 'offload';
 
       $.ajax({
-        url: myPluginAdmin.ajaxUrl,
+        url: cfr2Admin.ajaxUrl,
         type: 'POST',
         data: {
           action: ajaxAction,
-          nonce: $('#cloudflare_r2_offload_cdn_nonce').val(),
+          nonce: $('#cfr2_nonce').val(),
         },
         success: (response) => {
           if (response.success) {
@@ -677,11 +677,11 @@ import '../scss/admin.scss';
       $result.html('<span class="spinner is-active" style="float:none;margin:0 5px;"></span>');
 
       $.ajax({
-        url: myPluginAdmin.ajaxUrl,
+        url: cfr2Admin.ajaxUrl,
         type: 'POST',
         data: {
           action: 'cfr2_deploy_worker',
-          nonce: $('#cloudflare_r2_offload_cdn_nonce').val(),
+          nonce: $('#cfr2_nonce').val(),
         },
         success: (response) => {
           if (response.success) {
@@ -728,11 +728,11 @@ import '../scss/admin.scss';
       $result.html('<span class="spinner is-active" style="float:none;margin:0 5px;"></span>');
 
       $.ajax({
-        url: myPluginAdmin.ajaxUrl,
+        url: cfr2Admin.ajaxUrl,
         type: 'POST',
         data: {
           action: 'cfr2_remove_worker',
-          nonce: $('#cloudflare_r2_offload_cdn_nonce').val(),
+          nonce: $('#cfr2_nonce').val(),
         },
         success: (response) => {
           if (response.success) {
@@ -761,11 +761,11 @@ import '../scss/admin.scss';
      */
     loadActivityLog() {
       $.ajax({
-        url: myPluginAdmin.ajaxUrl,
+        url: cfr2Admin.ajaxUrl,
         type: 'POST',
         data: {
           action: 'cfr2_get_activity_log',
-          nonce: $('#cloudflare_r2_offload_cdn_nonce').val(),
+          nonce: $('#cfr2_nonce').val(),
           limit: 50,
         },
         success: (response) => {
@@ -828,11 +828,11 @@ import '../scss/admin.scss';
       }
 
       $.ajax({
-        url: myPluginAdmin.ajaxUrl,
+        url: cfr2Admin.ajaxUrl,
         type: 'POST',
         data: {
           action: 'cfr2_retry_failed',
-          nonce: $('#cloudflare_r2_offload_cdn_nonce').val(),
+          nonce: $('#cfr2_nonce').val(),
         },
         success: (response) => {
           if (response.success) {
@@ -860,11 +860,11 @@ import '../scss/admin.scss';
       const attachmentId = $(e.currentTarget).data('attachment-id');
 
       $.ajax({
-        url: myPluginAdmin.ajaxUrl,
+        url: cfr2Admin.ajaxUrl,
         type: 'POST',
         data: {
           action: 'cfr2_retry_single',
-          nonce: $('#cloudflare_r2_offload_cdn_nonce').val(),
+          nonce: $('#cfr2_nonce').val(),
           attachment_id: attachmentId,
         },
         success: (response) => {
@@ -946,11 +946,11 @@ import '../scss/admin.scss';
       }
 
       $.ajax({
-        url: myPluginAdmin.ajaxUrl,
+        url: cfr2Admin.ajaxUrl,
         type: 'POST',
         data: {
           action: 'cfr2_clear_log',
-          nonce: $('#cloudflare_r2_offload_cdn_nonce').val(),
+          nonce: $('#cfr2_nonce').val(),
         },
         success: (response) => {
           if (response.success) {
@@ -1008,11 +1008,11 @@ import '../scss/admin.scss';
       $status.show().html('<span class="spinner is-active" style="float:none;margin:0 5px;"></span> Checking DNS...');
 
       $.ajax({
-        url: myPluginAdmin.ajaxUrl,
+        url: cfr2Admin.ajaxUrl,
         type: 'POST',
         data: {
           action: 'cfr2_validate_cdn_dns',
-          nonce: $('#cloudflare_r2_offload_cdn_nonce').val(),
+          nonce: $('#cfr2_nonce').val(),
           cdn_url: cdnUrl,
         },
         success: (response) => {
@@ -1098,11 +1098,11 @@ import '../scss/admin.scss';
       $btn.addClass('is-loading').prop('disabled', true).text('Enabling...');
 
       $.ajax({
-        url: myPluginAdmin.ajaxUrl,
+        url: cfr2Admin.ajaxUrl,
         type: 'POST',
         data: {
           action: 'cfr2_enable_dns_proxy',
-          nonce: $('#cloudflare_r2_offload_cdn_nonce').val(),
+          nonce: $('#cfr2_nonce').val(),
           zone_id: zoneId,
           record_id: recordId,
         },
@@ -1158,11 +1158,11 @@ import '../scss/admin.scss';
       $list.html('<p class="cfr2-loading">Loading...</p>');
 
       $.ajax({
-        url: myPluginAdmin.ajaxUrl,
+        url: cfr2Admin.ajaxUrl,
         type: 'POST',
         data: {
           action: 'cfr2_get_pending_items',
-          nonce: $('#cloudflare_r2_offload_cdn_nonce').val(),
+          nonce: $('#cfr2_nonce').val(),
         },
         success: (response) => {
           if (response.success) {
@@ -1217,11 +1217,11 @@ import '../scss/admin.scss';
       $btn.prop('disabled', true).text('Cancelling...');
 
       $.ajax({
-        url: myPluginAdmin.ajaxUrl,
+        url: cfr2Admin.ajaxUrl,
         type: 'POST',
         data: {
           action: 'cfr2_cancel_pending_item',
-          nonce: $('#cloudflare_r2_offload_cdn_nonce').val(),
+          nonce: $('#cfr2_nonce').val(),
           item_id: itemId,
         },
         success: (response) => {
@@ -1263,11 +1263,11 @@ import '../scss/admin.scss';
       $btn.prop('disabled', true).text('Clearing...');
 
       $.ajax({
-        url: myPluginAdmin.ajaxUrl,
+        url: cfr2Admin.ajaxUrl,
         type: 'POST',
         data: {
           action: 'cfr2_clear_pending',
-          nonce: $('#cloudflare_r2_offload_cdn_nonce').val(),
+          nonce: $('#cfr2_nonce').val(),
         },
         success: (response) => {
           if (response.success) {
@@ -1292,11 +1292,11 @@ import '../scss/admin.scss';
      */
     updatePendingStat() {
       $.ajax({
-        url: myPluginAdmin.ajaxUrl,
+        url: cfr2Admin.ajaxUrl,
         type: 'POST',
         data: {
           action: 'cfr2_get_bulk_counts',
-          nonce: $('#cloudflare_r2_offload_cdn_nonce').val(),
+          nonce: $('#cfr2_nonce').val(),
         },
         success: (response) => {
           if (response.success && typeof response.data.pending !== 'undefined') {
