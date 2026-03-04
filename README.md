@@ -69,6 +69,25 @@ A production-ready WordPress plugin for offloading media to Cloudflare R2 with a
 ./scripts/build.sh zip         # Create ZIP archive (tp-media-offload-edge-cdn.zip)
 ./scripts/build.sh deploy-svn  # Deploy to SVN structure
 ./scripts/build.sh version X.X # Bump version
+./scripts/release-svn.sh       # Interactive WordPress.org SVN release flow
+```
+
+### WordPress.org SVN Release
+
+```bash
+# Recommended release flow (asks version, builds, syncs trunk/tag/assets, optional commit)
+./scripts/release-svn.sh
+
+# Non-interactive examples
+./scripts/release-svn.sh -v 1.0.1 -m "Release 1.0.1"
+./scripts/release-svn.sh -v 1.0.1 --skip-tests --no-commit
+```
+
+The release script reads these optional variables from `.env` (or environment):
+
+```bash
+WPORG_SVN_URL=https://plugins.svn.wordpress.org/tp-media-offload-edge-cdn
+WPORG_SVN_WORKING_COPY=~/tmp/wporg-tp-media-offload-edge-cdn
 ```
 
 ### Code Quality

@@ -266,10 +266,8 @@ cmd_zip() {
 cmd_deploy_svn() {
     log_info "Deploying to SVN structure..."
 
-    # Build first if not exists
-    if [ ! -d "$BUILD_DIR/$PLUGIN_SLUG" ]; then
-        cmd_build
-    fi
+    # Always rebuild to avoid deploying stale artifacts.
+    cmd_build
 
     # Clean SVN dir
     rm -rf "$SVN_DIR"
