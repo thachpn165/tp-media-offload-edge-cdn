@@ -17,6 +17,7 @@ ENV_FILE="$ROOT_DIR/.env"
 
 ENV_WPORG_SVN_URL="${WPORG_SVN_URL-}"
 ENV_WPORG_SVN_WORKING_COPY="${WPORG_SVN_WORKING_COPY-}"
+ENV_WPORG_SVN_USERNAME="${WPORG_SVN_USERNAME-}"
 
 if [ -f "$ENV_FILE" ]; then
 	# shellcheck disable=SC1090
@@ -31,8 +32,13 @@ if [ -n "$ENV_WPORG_SVN_WORKING_COPY" ]; then
 	WPORG_SVN_WORKING_COPY="$ENV_WPORG_SVN_WORKING_COPY"
 fi
 
+if [ -n "$ENV_WPORG_SVN_USERNAME" ]; then
+	WPORG_SVN_USERNAME="$ENV_WPORG_SVN_USERNAME"
+fi
+
 SVN_URL="${WPORG_SVN_URL:-https://plugins.svn.wordpress.org/${PLUGIN_SLUG}}"
 SVN_WORKING_COPY="${WPORG_SVN_WORKING_COPY:-$HOME/tmp/wporg-${PLUGIN_SLUG}}"
+SVN_USERNAME="${WPORG_SVN_USERNAME:-}"
 
 RELEASE_VERSION=""
 COMMIT_MESSAGE=""
@@ -48,12 +54,36 @@ log_info() { echo -e "${GREEN}[INFO]${NC} $1"; }
 log_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
 log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 
+to_lower() {
+	printf '%s' "$1" | tr '[:upper:]' '[:lower:]'
+}
+
+is_yes() {
+	case "$(to_lower "${1:-}")" in
+		y|yes)
+			return 0
+			;;
+		*)
+			return 1
+			;;
+	esac
+}
+
+run_svn() {
+	if [ -n "$SVN_USERNAME" ]; then
+		svn --username "$SVN_USERNAME" --force-interactive "$@"
+	else
+		svn "$@"
+	fi
+}
+
 print_help() {
 	echo "Usage: ./scripts/release-svn.sh [options]"
 	echo ""
 	echo "Options:"
 	echo "  -v, --version <x.y.z>   Release version (if omitted, script asks)"
 	echo "  -m, --message <text>    SVN commit message"
+	echo "  -u, --username <name>   Force SVN username (overrides cache)"
 	echo "      --skip-tests        Skip composer test"
 	echo "      --no-commit         Prepare working copy only, do not commit"
 	echo "  -h, --help              Show this help"
@@ -67,6 +97,10 @@ while [[ $# -gt 0 ]]; do
 			;;
 		-m|--message)
 			COMMIT_MESSAGE="${2:-}"
+			shift 2
+			;;
+		-u|--username)
+			SVN_USERNAME="${2:-}"
 			shift 2
 			;;
 		--skip-tests)
@@ -106,6 +140,9 @@ fi
 log_info "Release version: $RELEASE_VERSION"
 log_info "SVN URL: $SVN_URL"
 log_info "SVN working copy: $SVN_WORKING_COPY"
+if [ -n "$SVN_USERNAME" ]; then
+	log_info "SVN username (forced): $SVN_USERNAME"
+fi
 
 if [ "$RELEASE_VERSION" != "$CURRENT_VERSION" ]; then
 	log_info "Bumping version from $CURRENT_VERSION to $RELEASE_VERSION..."
@@ -133,19 +170,31 @@ log_info "Building release artifacts..."
 if [ ! -d "$SVN_WORKING_COPY/.svn" ]; then
 	log_info "Checking out SVN repository..."
 	mkdir -p "$(dirname "$SVN_WORKING_COPY")"
-	svn checkout "$SVN_URL" "$SVN_WORKING_COPY"
+	if [ ! -w "$(dirname "$SVN_WORKING_COPY")" ]; then
+		log_error "No write permission for SVN parent directory: $(dirname "$SVN_WORKING_COPY")"
+		log_error "Please choose a writable path in .env (WPORG_SVN_WORKING_COPY) or fix ownership."
+		exit 1
+	fi
+	run_svn checkout "$SVN_URL" "$SVN_WORKING_COPY"
 else
 	log_info "Updating existing SVN working copy..."
 	(
 		cd "$SVN_WORKING_COPY"
-		svn update
+		run_svn update
 	)
+fi
+
+if [ ! -w "$SVN_WORKING_COPY" ]; then
+	log_error "No write permission for SVN working copy: $SVN_WORKING_COPY"
+	log_error "Fix ownership, for example:"
+	log_error "  sudo chown -R $(id -un):$(id -gn) \"$SVN_WORKING_COPY\""
+	exit 1
 fi
 
 if [ -d "$SVN_WORKING_COPY/tags/$RELEASE_VERSION" ] && [ -n "$(ls -A "$SVN_WORKING_COPY/tags/$RELEASE_VERSION" 2>/dev/null || true)" ]; then
 	log_warn "Tag $RELEASE_VERSION already exists in working copy."
 	read -r -p "Continue and overwrite local tag content? [y/N]: " overwrite_tag
-	if [[ ! "${overwrite_tag,,}" =~ ^y(es)?$ ]]; then
+	if ! is_yes "$overwrite_tag"; then
 		log_error "Release aborted."
 		exit 1
 	fi
@@ -161,9 +210,9 @@ rsync -a --delete "$ROOT_DIR/svn/tags/$RELEASE_VERSION/" "$SVN_WORKING_COPY/tags
 log_info "Staging SVN changes..."
 (
 	cd "$SVN_WORKING_COPY"
-	svn add --force . >/dev/null
-	svn status | awk '/^\!/ {print substr($0,9)}' | while IFS= read -r missing_path; do
-		[ -n "$missing_path" ] && svn rm --force "$missing_path" >/dev/null
+	run_svn add --force . >/dev/null
+	run_svn status | awk '/^\!/ {print substr($0,9)}' | while IFS= read -r missing_path; do
+		[ -n "$missing_path" ] && run_svn rm --force "$missing_path" >/dev/null
 	done
 )
 
@@ -171,7 +220,7 @@ echo ""
 log_info "SVN status:"
 (
 	cd "$SVN_WORKING_COPY"
-	svn status
+	run_svn status
 )
 
 if [ "$NO_COMMIT" = "1" ]; then
@@ -187,7 +236,7 @@ fi
 
 echo ""
 read -r -p "Commit to WordPress.org SVN now? [y/N]: " confirm_commit
-if [[ ! "${confirm_commit,,}" =~ ^y(es)?$ ]]; then
+if ! is_yes "$confirm_commit"; then
 	log_warn "Commit skipped. You can commit manually from:"
 	echo "  $SVN_WORKING_COPY"
 	exit 0
@@ -196,7 +245,7 @@ fi
 log_info "Committing to SVN..."
 (
 	cd "$SVN_WORKING_COPY"
-	svn commit -m "$COMMIT_MESSAGE"
+	run_svn commit -m "$COMMIT_MESSAGE"
 )
 
 log_info "Release completed successfully."

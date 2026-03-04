@@ -81,6 +81,7 @@ A production-ready WordPress plugin for offloading media to Cloudflare R2 with a
 # Non-interactive examples
 ./scripts/release-svn.sh -v 1.0.1 -m "Release 1.0.1"
 ./scripts/release-svn.sh -v 1.0.1 --skip-tests --no-commit
+./scripts/release-svn.sh -v 1.0.1 -u thachpn165
 ```
 
 The release script reads these optional variables from `.env` (or environment):
@@ -88,6 +89,7 @@ The release script reads these optional variables from `.env` (or environment):
 ```bash
 WPORG_SVN_URL=https://plugins.svn.wordpress.org/tp-media-offload-edge-cdn
 WPORG_SVN_WORKING_COPY=~/tmp/wporg-tp-media-offload-edge-cdn
+WPORG_SVN_USERNAME=thachpn165
 ```
 
 ### Code Quality
