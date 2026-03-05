@@ -75,7 +75,7 @@ A production-ready WordPress plugin for offloading media to Cloudflare R2 with a
 ### WordPress.org SVN Release
 
 ```bash
-# Recommended release flow (asks version, builds, syncs trunk/tag/assets, optional commit)
+# Recommended release flow (asks version, builds, commits trunk/assets, creates tag via server-side svn copy)
 ./scripts/release-svn.sh
 
 # Non-interactive examples

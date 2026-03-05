@@ -77,6 +77,10 @@ run_svn() {
 	fi
 }
 
+svn_url_exists() {
+	run_svn ls "$1" >/dev/null 2>&1
+}
+
 print_help() {
 	echo "Usage: ./scripts/release-svn.sh [options]"
 	echo ""
@@ -144,6 +148,9 @@ if [ -n "$SVN_USERNAME" ]; then
 	log_info "SVN username (forced): $SVN_USERNAME"
 fi
 
+SVN_TRUNK_URL="${SVN_URL%/}/trunk"
+SVN_TAG_URL="${SVN_URL%/}/tags/$RELEASE_VERSION"
+
 if [ "$RELEASE_VERSION" != "$CURRENT_VERSION" ]; then
 	log_info "Bumping version from $CURRENT_VERSION to $RELEASE_VERSION..."
 	"$ROOT_DIR/scripts/build.sh" version "$RELEASE_VERSION"
@@ -191,21 +198,20 @@ if [ ! -w "$SVN_WORKING_COPY" ]; then
 	exit 1
 fi
 
-if [ -d "$SVN_WORKING_COPY/tags/$RELEASE_VERSION" ] && [ -n "$(ls -A "$SVN_WORKING_COPY/tags/$RELEASE_VERSION" 2>/dev/null || true)" ]; then
-	log_warn "Tag $RELEASE_VERSION already exists in working copy."
-	read -r -p "Continue and overwrite local tag content? [y/N]: " overwrite_tag
-	if ! is_yes "$overwrite_tag"; then
-		log_error "Release aborted."
+if svn_url_exists "$SVN_TAG_URL"; then
+	log_warn "Remote tag already exists: tags/$RELEASE_VERSION"
+	read -r -p "Continue and skip tag creation step? [y/N]: " skip_existing_tag
+	if ! is_yes "$skip_existing_tag"; then
+		log_error "Release aborted to avoid overwriting existing tag."
 		exit 1
 	fi
 fi
 
-log_info "Syncing trunk/assets/tag into SVN working copy..."
-mkdir -p "$SVN_WORKING_COPY/trunk" "$SVN_WORKING_COPY/assets" "$SVN_WORKING_COPY/tags/$RELEASE_VERSION"
+log_info "Syncing trunk/assets into SVN working copy..."
+mkdir -p "$SVN_WORKING_COPY/trunk" "$SVN_WORKING_COPY/assets"
 
 rsync -a --delete "$ROOT_DIR/svn/trunk/" "$SVN_WORKING_COPY/trunk/"
 rsync -a --delete "$ROOT_DIR/svn/assets/" "$SVN_WORKING_COPY/assets/"
-rsync -a --delete "$ROOT_DIR/svn/tags/$RELEASE_VERSION/" "$SVN_WORKING_COPY/tags/$RELEASE_VERSION/"
 
 log_info "Staging SVN changes..."
 (
@@ -226,6 +232,11 @@ log_info "SVN status:"
 if [ "$NO_COMMIT" = "1" ]; then
 	log_warn "Skipping commit (--no-commit). Working copy is ready at:"
 	echo "  $SVN_WORKING_COPY"
+	echo ""
+	log_info "Manual commands (recommended, lower timeout risk):"
+	echo "  cd \"$SVN_WORKING_COPY\""
+	echo "  svn commit -m \"Release $RELEASE_VERSION\" trunk assets"
+	echo "  svn copy \"$SVN_TRUNK_URL\" \"$SVN_TAG_URL\" -m \"Tag $RELEASE_VERSION\""
 	exit 0
 fi
 
@@ -245,7 +256,14 @@ fi
 log_info "Committing to SVN..."
 (
 	cd "$SVN_WORKING_COPY"
-	run_svn commit -m "$COMMIT_MESSAGE"
+	run_svn commit -m "$COMMIT_MESSAGE" trunk assets
 )
+
+if svn_url_exists "$SVN_TAG_URL"; then
+	log_warn "Tag already exists, skipped remote tag creation: tags/$RELEASE_VERSION"
+else
+	log_info "Creating remote tag via server-side copy (fast, no full re-upload)..."
+	run_svn copy "$SVN_TRUNK_URL" "$SVN_TAG_URL" -m "Tag $RELEASE_VERSION"
+fi
 
 log_info "Release completed successfully."
