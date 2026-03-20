@@ -6,6 +6,10 @@
 
 set -e
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+cd "$ROOT_DIR"
+
 # Configuration
 MAIN_PLUGIN_FILE="tp-media-offload-edge-cdn.php"
 PLUGIN_SLUG="$(basename "$MAIN_PLUGIN_FILE" .php)"
@@ -24,6 +28,63 @@ NC='\033[0m' # No Color
 log_info() { echo -e "${GREEN}[INFO]${NC} $1"; }
 log_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
 log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
+
+replace_first_match() {
+    local file_path="$1"
+    local pattern="$2"
+    local replacement="$3"
+    local label="$4"
+
+    php -r '
+        $file = $argv[1];
+        $pattern = $argv[2];
+        $replacement = $argv[3];
+        $label = $argv[4];
+        $contents = file_get_contents($file);
+        if (false === $contents) {
+            fwrite(STDERR, "Failed to read {$file}\n");
+            exit(1);
+        }
+        $updated = preg_replace($pattern, $replacement, $contents, 1, $count);
+        if (1 !== $count || null === $updated) {
+            fwrite(STDERR, "Failed to update {$label} in {$file}\n");
+            exit(1);
+        }
+        if (false === file_put_contents($file, $updated)) {
+            fwrite(STDERR, "Failed to write {$file}\n");
+            exit(1);
+        }
+    ' "$file_path" "$pattern" "$replacement" "$label"
+}
+
+verify_version_metadata() {
+    local expected_version="$1"
+
+    if [ -f "$MAIN_PLUGIN_FILE" ]; then
+        grep -Eq "^ \* Version:[[:space:]]*$expected_version$" "$MAIN_PLUGIN_FILE" || {
+            log_error "Main plugin file header version is not $expected_version"
+            exit 1
+        }
+        grep -Fq "define( 'CFR2_VERSION', '$expected_version' );" "$MAIN_PLUGIN_FILE" || {
+            log_error "CFR2_VERSION constant is not $expected_version"
+            exit 1
+        }
+    fi
+
+    if [ -f "readme.txt" ]; then
+        grep -Eq "^Stable tag: $expected_version$" readme.txt || {
+            log_error "readme.txt stable tag is not $expected_version"
+            exit 1
+        }
+    fi
+
+    if [ -f "package.json" ]; then
+        grep -Eq "\"version\": \"$expected_version\"" package.json || {
+            log_error "package.json version is not $expected_version"
+            exit 1
+        }
+    fi
+}
 
 # =============================================================================
 # Commands
@@ -307,22 +368,21 @@ cmd_version() {
 
     # Update main plugin file
     if [ -f "$MAIN_PLUGIN_FILE" ]; then
-        sed -i.bak "s/^ \\* Version:.*$/ * Version:           $new_version/" "$MAIN_PLUGIN_FILE"
-        sed -i.bak "s/define( 'CFR2_VERSION', '.*' );/define( 'CFR2_VERSION', '$new_version' );/" "$MAIN_PLUGIN_FILE"
+        replace_first_match "$MAIN_PLUGIN_FILE" "/^ \\* Version:\\h*.*/m" " * Version:           $new_version" "plugin header version"
+        replace_first_match "$MAIN_PLUGIN_FILE" "/define\\( 'CFR2_VERSION', '[^']*' \\);/" "define( 'CFR2_VERSION', '$new_version' );" "plugin constant version"
     fi
 
     # Update readme.txt
     if [ -f "readme.txt" ]; then
-        sed -i.bak "s/Stable tag:.*$/Stable tag: $new_version/" readme.txt
+        replace_first_match "readme.txt" "/^Stable tag:\\h*.*/m" "Stable tag: $new_version" "readme stable tag"
     fi
 
     # Update package.json
     if [ -f "package.json" ]; then
-        sed -i.bak "s/\"version\": \".*\"/\"version\": \"$new_version\"/" package.json
+        replace_first_match "package.json" "/\"version\":\\h*\"[^\"]*\"/" "\"version\": \"$new_version\"" "package version"
     fi
 
-    # Clean backup files
-    find . -name "*.bak" -type f -delete 2>/dev/null || true
+    verify_version_metadata "$new_version"
 
     log_info "Version bumped to $new_version"
 }

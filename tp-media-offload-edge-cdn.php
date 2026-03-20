@@ -3,7 +3,7 @@
  * Plugin Name: TP Media Offload & Edge CDN
  * Plugin URI:  https://wordpress.org/plugins/tp-media-offload-edge-cdn/
  * Description: Offload WordPress media to Cloudflare R2 storage and serve via CDN with automatic image optimization (WebP/AVIF, responsive sizes, quality control).
- * Version:           1.0.0
+ * Version:           1.0.1
  * Author:      TP
  * Author URI:  https://profiles.wordpress.org/thachpn165/
  * License:     GPL-2.0+
@@ -19,7 +19,7 @@
 defined( 'ABSPATH' ) || exit;
 
 // Plugin constants.
-define( 'CFR2_VERSION', '1.0.0' );
+define( 'CFR2_VERSION', '1.0.1' );
 define( 'CFR2_FILE', __FILE__ );
 define( 'CFR2_PATH', plugin_dir_path( __FILE__ ) );
 define( 'CFR2_URL', plugin_dir_url( __FILE__ ) );

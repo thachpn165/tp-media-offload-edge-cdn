@@ -77,6 +77,71 @@ run_svn() {
 	fi
 }
 
+verify_release_source_metadata() {
+	local expected_version="$1"
+	local source_readme="$ROOT_DIR/readme.txt"
+	local source_plugin="$ROOT_DIR/$(basename "$MAIN_PLUGIN_FILE")"
+
+	grep -Eq "^Stable tag: $expected_version$" "$source_readme" || {
+		log_error "Source readme.txt stable tag is not $expected_version"
+		exit 1
+	}
+
+	grep -Eq "^ \* Version:[[:space:]]*$expected_version$" "$source_plugin" || {
+		log_error "Source plugin header version is not $expected_version"
+		exit 1
+	}
+
+	grep -Fq "define( 'CFR2_VERSION', '$expected_version' );" "$source_plugin" || {
+		log_error "Source CFR2_VERSION constant is not $expected_version"
+		exit 1
+	}
+}
+
+verify_release_artifacts() {
+	local expected_version="$1"
+	local trunk_readme="$ROOT_DIR/svn/trunk/readme.txt"
+	local trunk_plugin="$ROOT_DIR/svn/trunk/$PLUGIN_SLUG.php"
+	local tag_dir="$ROOT_DIR/svn/tags/$expected_version"
+	local tag_readme="$tag_dir/readme.txt"
+	local tag_plugin="$tag_dir/$PLUGIN_SLUG.php"
+
+	[ -d "$tag_dir" ] || {
+		log_error "Missing built tag directory: $tag_dir"
+		exit 1
+	}
+
+	grep -Eq "^Stable tag: $expected_version$" "$trunk_readme" || {
+		log_error "Built trunk readme.txt stable tag is not $expected_version"
+		exit 1
+	}
+
+	grep -Eq "^Stable tag: $expected_version$" "$tag_readme" || {
+		log_error "Built tag readme.txt stable tag is not $expected_version"
+		exit 1
+	}
+
+	grep -Eq "^ \* Version:[[:space:]]*$expected_version$" "$trunk_plugin" || {
+		log_error "Built trunk plugin header version is not $expected_version"
+		exit 1
+	}
+
+	grep -Eq "^ \* Version:[[:space:]]*$expected_version$" "$tag_plugin" || {
+		log_error "Built tag plugin header version is not $expected_version"
+		exit 1
+	}
+
+	grep -Fq "define( 'CFR2_VERSION', '$expected_version' );" "$trunk_plugin" || {
+		log_error "Built trunk CFR2_VERSION constant is not $expected_version"
+		exit 1
+	}
+
+	grep -Fq "define( 'CFR2_VERSION', '$expected_version' );" "$tag_plugin" || {
+		log_error "Built tag CFR2_VERSION constant is not $expected_version"
+		exit 1
+	}
+}
+
 svn_url_exists() {
 	run_svn ls "$1" >/dev/null 2>&1
 }
@@ -158,6 +223,8 @@ else
 	log_info "Version already set to $RELEASE_VERSION"
 fi
 
+verify_release_source_metadata "$RELEASE_VERSION"
+
 if [ "$SKIP_TESTS" = "0" ]; then
 	log_info "Running tests..."
 	(
@@ -173,6 +240,8 @@ log_info "Building release artifacts..."
 	cd "$ROOT_DIR"
 	./scripts/build.sh deploy-svn
 )
+
+verify_release_artifacts "$RELEASE_VERSION"
 
 if [ ! -d "$SVN_WORKING_COPY/.svn" ]; then
 	log_info "Checking out SVN repository..."
