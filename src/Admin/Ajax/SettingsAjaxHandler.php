@@ -91,6 +91,7 @@ class SettingsAjaxHandler {
 				array( 'message' => __( 'Too many requests. Please try again later.', 'tp-media-offload-edge-cdn' ) ),
 				429
 			);
+			return;
 		}
 
 		// Increment rate limit counter.
@@ -139,12 +140,14 @@ class SettingsAjaxHandler {
 				wp_send_json_success(
 					array( 'message' => __( 'No changes detected.', 'tp-media-offload-edge-cdn' ) )
 				);
+				return;
 			}
 
 			wp_send_json_error(
 				array( 'message' => __( 'Failed to save settings. Please try again.', 'tp-media-offload-edge-cdn' ) ),
 				500
 			);
+			return;
 		}
 
 		wp_send_json_success(
@@ -160,6 +163,7 @@ class SettingsAjaxHandler {
 	 */
 	public function sanitize_settings( array $input ): array {
 		$sanitized = array();
+		$existing  = PluginSettings::get();
 
 		// R2 Credentials - sanitize and encrypt.
 		$sanitized['r2_account_id']    = preg_replace( '/[^a-zA-Z0-9]/', '', $input['r2_account_id'] ?? '' );
@@ -171,8 +175,6 @@ class SettingsAjaxHandler {
 			$encryption                        = EncryptionService::get_instance();
 			$sanitized['r2_secret_access_key'] = $encryption->encrypt( $secret );
 		} else {
-			// Keep existing value.
-			$existing                          = PluginSettings::get();
 			$sanitized['r2_secret_access_key'] = $existing['r2_secret_access_key'] ?? '';
 		}
 
@@ -213,13 +215,10 @@ class SettingsAjaxHandler {
 			$encryption                = EncryptionService::get_instance();
 			$sanitized['cf_api_token'] = $encryption->encrypt( $cf_token );
 		} else {
-			// Keep existing value.
-			$existing                  = PluginSettings::get();
 			$sanitized['cf_api_token'] = $existing['cf_api_token'] ?? '';
 		}
 
 		// Worker deployment internal fields (preserve).
-		$existing                        = PluginSettings::get();
 		$sanitized['worker_deployed']    = $existing['worker_deployed'] ?? false;
 		$sanitized['worker_name']        = $existing['worker_name'] ?? '';
 		$sanitized['worker_deployed_at'] = $existing['worker_deployed_at'] ?? '';
@@ -256,6 +255,7 @@ class SettingsAjaxHandler {
 				array( 'message' => __( 'Too many attempts. Wait 60 seconds.', 'tp-media-offload-edge-cdn' ) ),
 				429
 			);
+			return;
 		}
 		set_transient( $rate_key, ( $count ? (int) $count + 1 : 1 ), 60 );
 
@@ -284,6 +284,7 @@ class SettingsAjaxHandler {
 		$error_message = SettingsValidator::validate_r2_credentials( $credentials );
 		if ( null !== $error_message ) {
 			wp_send_json_error( array( 'message' => $error_message ) );
+			return;
 		}
 
 		// Test connection.
@@ -294,9 +295,10 @@ class SettingsAjaxHandler {
 			wp_send_json_success(
 				array( 'message' => __( 'Connection successful!', 'tp-media-offload-edge-cdn' ) )
 			);
-		} else {
-			wp_send_json_error( array( 'message' => $result['message'] ) );
+			return;
 		}
+
+		wp_send_json_error( array( 'message' => $result['message'] ) );
 	}
 
 	/**
@@ -312,6 +314,7 @@ class SettingsAjaxHandler {
 
 		if ( empty( $cdn_url ) ) {
 			wp_send_json_error( array( 'message' => __( 'CDN URL is required.', 'tp-media-offload-edge-cdn' ) ) );
+			return;
 		}
 
 		$settings      = PluginSettings::get();
@@ -319,6 +322,7 @@ class SettingsAjaxHandler {
 
 		if ( null !== $error_message ) {
 			wp_send_json_error( array( 'message' => $error_message ) );
+			return;
 		}
 
 		$encryption = EncryptionService::get_instance();
@@ -329,9 +333,10 @@ class SettingsAjaxHandler {
 
 		if ( $result['success'] ) {
 			wp_send_json_success( $result );
-		} else {
-			wp_send_json_error( $result );
+			return;
 		}
+
+		wp_send_json_error( $result );
 	}
 
 	/**
@@ -349,6 +354,7 @@ class SettingsAjaxHandler {
 
 		if ( empty( $zone_id ) || empty( $record_id ) ) {
 			wp_send_json_error( array( 'message' => __( 'Missing zone or record ID.', 'tp-media-offload-edge-cdn' ) ) );
+			return;
 		}
 
 		$settings      = PluginSettings::get();
@@ -356,6 +362,7 @@ class SettingsAjaxHandler {
 
 		if ( null !== $error_message ) {
 			wp_send_json_error( array( 'message' => $error_message ) );
+			return;
 		}
 
 		$encryption = EncryptionService::get_instance();
@@ -366,8 +373,9 @@ class SettingsAjaxHandler {
 
 		if ( $result['success'] ) {
 			wp_send_json_success( array( 'message' => __( 'Proxy enabled successfully!', 'tp-media-offload-edge-cdn' ) ) );
-		} else {
-			wp_send_json_error( array( 'message' => $result['errors'][0]['message'] ?? __( 'Failed to enable proxy.', 'tp-media-offload-edge-cdn' ) ) );
+			return;
 		}
+
+		wp_send_json_error( array( 'message' => $result['errors'][0]['message'] ?? __( 'Failed to enable proxy.', 'tp-media-offload-edge-cdn' ) ) );
 	}
 }

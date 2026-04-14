@@ -15,10 +15,7 @@ use ThachPN165\CFR2OffLoad\Admin\Ajax\SettingsAjaxHandler;
 use ThachPN165\CFR2OffLoad\Admin\Ajax\BulkOperationAjaxHandler;
 use ThachPN165\CFR2OffLoad\Admin\Ajax\WorkerAjaxHandler;
 use ThachPN165\CFR2OffLoad\Admin\Ajax\ActivityAjaxHandler;
-use ThachPN165\CFR2OffLoad\Constants\Settings;
-use ThachPN165\CFR2OffLoad\Constants\BatchConfig;
 use ThachPN165\CFR2OffLoad\Interfaces\HookableInterface;
-use ThachPN165\CFR2OffLoad\Services\PluginSettings;
 
 /**
  * AdminMenu class - handles admin menu registration and AJAX delegation.
@@ -78,7 +75,6 @@ class AdminMenu implements HookableInterface {
 	 */
 	public function register_hooks(): void {
 		add_action( 'admin_menu', array( $this, 'add_menu_page' ) );
-		add_action( 'admin_init', array( $this, 'register_settings' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_menu_icon_style' ) );
 
 		// Delegate AJAX hooks to specialized handlers.
@@ -127,71 +123,4 @@ class AdminMenu implements HookableInterface {
 		wp_add_inline_style( self::MENU_ICON_STYLE_HANDLE, $css );
 	}
 
-	/**
-	 * Register settings.
-	 */
-	public function register_settings(): void {
-		register_setting(
-			Settings::SETTINGS_GROUP,
-			Settings::OPTION_KEY,
-			array(
-				'type'              => 'array',
-				'default'           => PluginSettings::defaults(),
-				'sanitize_callback' => array( $this, 'sanitize_registered_settings' ),
-			)
-		);
-	}
-
-	/**
-	 * Sanitize settings registered through register_setting.
-	 *
-	 * @param mixed $input Raw option value.
-	 * @return array Sanitized option value.
-	 */
-	public function sanitize_registered_settings( $input ): array {
-		if ( ! is_array( $input ) ) {
-			return PluginSettings::defaults();
-		}
-
-		$existing = PluginSettings::get();
-		$merged   = wp_parse_args( $input, $existing );
-
-		$secret_value = array_key_exists( 'r2_secret_access_key', $input )
-			? sanitize_text_field( (string) $input['r2_secret_access_key'] )
-			: '********';
-
-		$token_value = array_key_exists( 'cf_api_token', $input )
-			? sanitize_text_field( (string) $input['cf_api_token'] )
-			: '********';
-
-		$normalized = array(
-			'r2_account_id'        => sanitize_text_field( (string) ( $merged['r2_account_id'] ?? '' ) ),
-			'r2_access_key_id'     => sanitize_text_field( (string) ( $merged['r2_access_key_id'] ?? '' ) ),
-			'r2_secret_access_key' => $secret_value,
-			'r2_bucket'            => sanitize_text_field( (string) ( $merged['r2_bucket'] ?? '' ) ),
-			'r2_public_domain'     => esc_url_raw( (string) ( $merged['r2_public_domain'] ?? '' ) ),
-			'auto_offload'         => ! empty( $merged['auto_offload'] ) ? 1 : 0,
-			'batch_size'           => absint( $merged['batch_size'] ?? BatchConfig::DEFAULT_SIZE ),
-			'keep_local_files'     => ! empty( $merged['keep_local_files'] ) ? 1 : 0,
-			'sync_delete'          => ! empty( $merged['sync_delete'] ) ? 1 : 0,
-			'cdn_enabled'          => ! empty( $merged['cdn_enabled'] ) ? 1 : 0,
-			'cdn_url'              => esc_url_raw( (string) ( $merged['cdn_url'] ?? '' ) ),
-			'quality'              => absint( $merged['quality'] ?? 85 ),
-			'image_format'         => sanitize_text_field( (string) ( $merged['image_format'] ?? 'webp' ) ),
-			'smart_sizes'          => ! empty( $merged['smart_sizes'] ) ? 1 : 0,
-			'content_max_width'    => absint( $merged['content_max_width'] ?? 800 ),
-			'cf_api_token'         => $token_value,
-		);
-
-		return $this->settings_handler->sanitize_settings( $normalized );
-	}
-
-	/**
-	 * Get default settings.
-	 *
-	 * @return array Default settings.
-	 */
-	private function get_default_settings(): array {
-		return PluginSettings::defaults();
-	}
 }
